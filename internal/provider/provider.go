@@ -2,9 +2,9 @@ package provider
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-scaffolding/internal/aidbox"
 )
 
 func init() {
@@ -26,11 +26,30 @@ func init() {
 func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
+			Schema: map[string]*schema.Schema{
+                "username": {
+                    Type:        schema.TypeString,
+                    Description: "The username to access aidbox API",
+					Required: true,
+                },
+				"password": {
+					Type: schema.TypeString,
+					Description: "The password to access aidbox API",
+					Required: true,
+					Sensitive: true,
+					
+				},
+				"url": {
+					Type: schema.TypeString,
+					Description: "The URL of aidbox API",
+					Required: true,
+				},
+            },
 			DataSourcesMap: map[string]*schema.Resource{
-				"scaffolding_data_source": dataSourceScaffolding(),
+				"aidbox_token_introspector": dataSourceTokenIntrospector(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"scaffolding_resource": resourceScaffolding(),
+				"aidbox_token_introspector": resourceTokenIntrospector(),
 			},
 		}
 
@@ -40,18 +59,11 @@ func New(version string) func() *schema.Provider {
 	}
 }
 
-type apiClient struct {
-	// Add whatever fields, client or connection info, etc. here
-	// you would need to setup to communicate with the upstream
-	// API.
-}
-
 func configure(version string, p *schema.Provider) func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	return func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		// Setup a User-Agent for your API client (replace the provider name for yours):
-		// userAgent := p.UserAgent("terraform-provider-scaffolding", version)
-		// TODO: myClient.UserAgent = userAgent
-
-		return &apiClient{}, nil
+	return func(ctx context.Context, rd *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		url := rd.Get("url").(string)
+		username := rd.Get("username").(string)
+		password := rd.Get("password").(string)
+		return aidbox.NewClient(url, username, password), nil
 	}
 }
