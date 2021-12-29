@@ -61,10 +61,32 @@ func New(client *aidbox.Client) func() *schema.Provider {
 			if client != nil {
 				return client, nil
 			}
-			url := rd.Get("url").(string)
-			username := rd.Get("username").(string)
-			password := rd.Get("password").(string)
-			return aidbox.NewClient(url, username, password), nil
+			var clientId, clientSecret, url string
+			urlI, ok := rd.GetOk("url")
+			if !ok {
+				return nil, diag.Errorf("url is not supplied")
+			}
+			url, ok = urlI.(string)
+			if !ok {
+				return nil, diag.Errorf("url is wrong type")
+			}
+			clientIdI, ok := rd.GetOk("client_id")
+			if !ok {
+				return nil, diag.Errorf("client_id is not supplied")
+			}
+			clientId, ok = clientIdI.(string)
+			if !ok {
+				return nil, diag.Errorf("client_id is wrong type")
+			}
+			clientSecretI, ok := rd.GetOk("client_secret")
+			if !ok {
+				return nil, diag.Errorf("client_secret is not supplied")
+			}
+			clientSecret, ok = clientSecretI.(string)
+			if !ok {
+				return nil, diag.Errorf("client_secret is wrong type")
+			}
+			return aidbox.NewClient(url, clientId, clientSecret), nil
 		}
 
 		return p
