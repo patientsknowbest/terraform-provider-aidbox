@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  database:
+    image: "healthsamurai/aidboxdb:13.2"
+    ports:
+      - "5437:5432"
+    environment:
+      POSTGRES_USER:     "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB:       "devbox"
+
+  devbox:
+    image: "healthsamurai/devbox:stable"
+    ports:
+      - "8888:8888"
+    environment:
+      PGHOST: "database"
+      AIDBOX_LICENSE_ID: "${AIDBOX_LICENSE_ID:?err}"
+      AIDBOX_LICENSE_KEY: "${AIDBOX_LICENSE_KEY:?err}"
+      AIDBOX_CLIENT_ID: "root"
+      AIDBOX_CLIENT_SECRET: "secret"
+      AIDBOX_ADMIN_ID: "admin"
+      AIDBOX_ADMIN_PASSWORD: "secret"
+      AIDBOX_PORT: "8888"
+      AIDBOX_FHIR_VERSION: "4.0.0"
+      PGPORT: "5432"
+      PGUSER: "postgres"
+      PGPASSWORD: "postgres"
+      PGDATABASE: "devbox"
+

@@ -23,28 +23,30 @@ func init() {
 	// }
 }
 
-func New(version string) func() *schema.Provider {
+func New(client *aidbox.Client) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			Schema: map[string]*schema.Schema{
-                "username": {
-                    Type:        schema.TypeString,
-                    Description: "The username to access aidbox API",
-					Required: true,
-                },
-				"password": {
-					Type: schema.TypeString,
-					Description: "The password to access aidbox API",
-					Required: true,
-					Sensitive: true,
-					
+				"client_id": {
+					Type:        schema.TypeString,
+					Description: "The client ID to access aidbox API",
+					Required:    true,
+					DefaultFunc: schema.EnvDefaultFunc("AIDBOX_CLIENT_ID", "root"),
+				},
+				"client_secret": {
+					Type:        schema.TypeString,
+					Description: "The client secret to access aidbox API",
+					Required:    true,
+					Sensitive:   true,
+					DefaultFunc: schema.EnvDefaultFunc("AIDBOX_CLIENT_SECRET", "secret"),
 				},
 				"url": {
-					Type: schema.TypeString,
+					Type:        schema.TypeString,
 					Description: "The URL of aidbox API",
-					Required: true,
+					Required:    true,
+					DefaultFunc: schema.EnvDefaultFunc("AIDBOX_URL", "http://localhost:8888/"),
 				},
-            },
+			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"aidbox_token_introspector": dataSourceTokenIntrospector(),
 			},
@@ -53,17 +55,16 @@ func New(version string) func() *schema.Provider {
 			},
 		}
 
-		p.ConfigureContextFunc = configure(version, p)
+		p.ConfigureContextFunc = func(cx context.Context, rd *schema.ResourceData) (interface{}, diag.Diagnostics) {
+			if client != nil {
+				return client, nil
+			}
+			url := rd.Get("url").(string)
+			username := rd.Get("username").(string)
+			password := rd.Get("password").(string)
+			return aidbox.NewClient(url, username, password), nil
+		}
 
 		return p
-	}
-}
-
-func configure(version string, p *schema.Provider) func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	return func(ctx context.Context, rd *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		url := rd.Get("url").(string)
-		username := rd.Get("username").(string)
-		password := rd.Get("password").(string)
-		return aidbox.NewClient(url, username, password), nil
 	}
 }

@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -10,13 +9,13 @@ import (
 func TestAccResourceTokenIntrospector(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
+		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceTokenIntrospector,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr(
-						"TokenIntrospector_resource.foo", "sample_attribute", regexp.MustCompile("^ba")),
+					resource.TestCheckResourceAttr("aidbox_token_introspector.example", "jwks_uri", "http://keycloak:8080/auth/realms/pkb/protocol/openid-connect/certs"),
+					resource.TestCheckResourceAttr("aidbox_token_introspector.example", "jwt.0.iss", "http://keycloak:8080/auth/realms/pkb"),
 				),
 			},
 		},

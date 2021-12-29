@@ -2,6 +2,7 @@ package aidbox
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +11,7 @@ import (
 )
 
 type Client struct {
-	URL string
+	URL      string
 	Username string
 	Password string
 }
@@ -19,13 +20,17 @@ func NewClient(URL, username, password string) *Client {
 	return &Client{URL: URL, Username: username, Password: password}
 }
 
-func (client *Client) CreateTokenIntrospector(introspector *TokenIntrospector) (*TokenIntrospector, error) {
+func isAlright(statusCode int) bool {
+	return statusCode >= http.StatusOK && statusCode < http.StatusBadRequest
+}
+
+func (client *Client) CreateTokenIntrospector(ctx context.Context, introspector *TokenIntrospector) (*TokenIntrospector, error) {
 	buf := bytes.Buffer{}
 	err := json.NewEncoder(&buf).Encode(introspector)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodPost, client.URL + "/TokenIntrospector", &buf)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, client.URL+"/TokenIntrospector", &buf)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +48,8 @@ func (client *Client) CreateTokenIntrospector(introspector *TokenIntrospector) (
 	return result, err
 }
 
-func (client *Client) GetTokenIntrospector(id string) (*TokenIntrospector, error) {
-	req, err := http.NewRequest(http.MethodGet, client.URL + "/TokenIntrospector/" + id, nil)
+func (client *Client) GetTokenIntrospector(ctx context.Context, id string) (*TokenIntrospector, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, client.URL+"/TokenIntrospector/"+id, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +59,7 @@ func (client *Client) GetTokenIntrospector(id string) (*TokenIntrospector, error
 	if err != nil {
 		return nil, err
 	}
+
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("Unexpected status code %d %s", res.StatusCode, res.Status)
 	}
@@ -68,8 +74,8 @@ func (client *Client) GetTokenIntrospector(id string) (*TokenIntrospector, error
 	return rr.(*TokenIntrospector), nil
 }
 
-func (client *Client) GetTokenIntrospectors() ([]*TokenIntrospector, error) {
-	req, err := http.NewRequest(http.MethodGet, client.URL + "/TokenIntrospector", nil)
+func (client *Client) GetTokenIntrospectors(ctx context.Context) ([]*TokenIntrospector, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, client.URL+"/TokenIntrospector", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -88,23 +94,23 @@ func (client *Client) GetTokenIntrospectors() ([]*TokenIntrospector, error) {
 	}
 	rr, err := parseSearchResponse(b)
 	if err != nil {
-        return nil, err
-    }
+		return nil, err
+	}
 	tis := make([]*TokenIntrospector, len(rr))
 	for i, r := range rr {
-        tis[i] = r.(*TokenIntrospector)
-    }
+		tis[i] = r.(*TokenIntrospector)
+	}
 	return tis, err
 }
 
-func (client *Client) UpdateTokenIntrospector(q *TokenIntrospector) (*TokenIntrospector, error) {
+func (client *Client) UpdateTokenIntrospector(ctx context.Context, q *TokenIntrospector) (*TokenIntrospector, error) {
 	buf := bytes.Buffer{}
 	err := json.NewEncoder(&buf).Encode(q)
 	if err != nil {
 		return nil, err
 	}
 	log.Printf("[TRACE] sending [[ %s ]]", buf.String())
-	req, err := http.NewRequest(http.MethodPut, client.URL + "/TokenIntrospector/"+q.ID, &buf)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, client.URL+"/TokenIntrospector/"+q.ID, &buf)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +120,7 @@ func (client *Client) UpdateTokenIntrospector(q *TokenIntrospector) (*TokenIntro
 	if err != nil {
 		return nil, err
 	}
-	if res.StatusCode != http.StatusOK {
+	if !isAlright(res.StatusCode) {
 		return nil, fmt.Errorf("Unexpected status code %d %s", res.StatusCode, res.Status)
 	}
 	b, err := ioutil.ReadAll(res.Body)
@@ -128,8 +134,8 @@ func (client *Client) UpdateTokenIntrospector(q *TokenIntrospector) (*TokenIntro
 	return rr.(*TokenIntrospector), nil
 }
 
-func (client *Client) DeleteTokenIntrospector(id string) error {
-	req, err := http.NewRequest(http.MethodDelete, client.URL + "/TokenIntrospector/"+id, nil)
+func (client *Client) DeleteTokenIntrospector(ctx context.Context, id string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, client.URL+"/TokenIntrospector/"+id, nil)
 	if err != nil {
 		return err
 	}
@@ -138,7 +144,7 @@ func (client *Client) DeleteTokenIntrospector(id string) error {
 	if err != nil {
 		return err
 	}
-	if res.StatusCode != http.StatusOK {
+	if !isAlright(res.StatusCode) {
 		return fmt.Errorf("Unexpected status code %d %s", res.StatusCode, res.Status)
 	}
 	return nil
@@ -148,10 +154,10 @@ func (client *Client) DeleteTokenIntrospector(id string) error {
 func parseSearchResponse(in []byte) ([]Resource, error) {
 	lst := &struct {
 		ResourceType string `json:"resourceType"`
-		Entry []struct {
+		Entry        []struct {
 			Resource json.RawMessage `json:"resource"`
 		} `json:"entry"`
-	} {}
+	}{}
 	err := json.Unmarshal(in, &lst)
 	if err != nil {
 		return nil, err
@@ -184,7 +190,7 @@ func parseResource(in []byte) (Resource, error) {
 	switch s.ResourceType {
 	case "TokenIntrospector":
 		r = &TokenIntrospector{}
-	default: 
+	default:
 		return nil, fmt.Errorf("Unsupported resource type %s", s.ResourceType)
 	}
 	err = json.Unmarshal(in, &r)
