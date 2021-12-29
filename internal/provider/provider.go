@@ -49,9 +49,11 @@ func New(client *aidbox.Client) func() *schema.Provider {
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"aidbox_token_introspector": dataSourceTokenIntrospector(),
+				"aidbox_access_policy":      dataSourceAccessPolicy(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"aidbox_token_introspector": resourceTokenIntrospector(),
+				"aidbox_access_policy":      resourceAccessPolicy(),
 			},
 		}
 

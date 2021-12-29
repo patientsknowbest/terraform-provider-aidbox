@@ -1,5 +1,5 @@
 provider "aidbox" {
-  username = "client-a"
-  password = "secret"
-  url      = "http://localhost:48083"
+  client_id     = "root"
+  client_secret = "secret"
+  url           = "http://localhost:8888"
 }

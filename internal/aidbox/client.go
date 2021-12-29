@@ -43,6 +43,8 @@ func parseResource(in []byte) (Resource, error) {
 	switch s.ResourceType {
 	case "TokenIntrospector":
 		r = &TokenIntrospector{}
+	case "AccessPolicy":
+		r = &AccessPolicy{}
 	default:
 		return nil, fmt.Errorf("Unsupported resource type %s", s.ResourceType)
 	}

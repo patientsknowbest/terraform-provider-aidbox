@@ -9,6 +9,17 @@ import (
 	"log"
 )
 
+func resourceTokenIntrospector() *schema.Resource {
+	return &schema.Resource{
+		Description:   "TokenIntrospector https://docs.aidbox.app/security-and-access-control-1/auth/access-token-introspection.",
+		CreateContext: resourceTokenIntrospectorCreate,
+		ReadContext:   resourceTokenIntrospectorRead,
+		UpdateContext: resourceTokenIntrospectorUpdate,
+		DeleteContext: resourceTokenIntrospectorDelete,
+		Schema:        resourceFullSchema(resourceSchemaTokenIntrospector()),
+	}
+}
+
 func resourceSchemaTokenIntrospector() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type": {
@@ -71,18 +82,6 @@ func resourceSchemaTokenIntrospector() map[string]*schema.Schema {
 		},
 	}
 }
-
-func resourceTokenIntrospector() *schema.Resource {
-	return &schema.Resource{
-		Description:   "TokenIntrospector https://docs.aidbox.app/security-and-access-control-1/auth/access-token-introspection.",
-		CreateContext: resourceTokenIntrospectorCreate,
-		ReadContext:   resourceTokenIntrospectorRead,
-		UpdateContext: resourceTokenIntrospectorUpdate,
-		DeleteContext: resourceTokenIntrospectorDelete,
-		Schema:        resourceFullSchema(resourceSchemaTokenIntrospector()),
-	}
-}
-
 func mapTokenIntrospectorToData(v *aidbox.TokenIntrospector, data *schema.ResourceData) {
 	mapResourceBaseToData(&v.ResourceBase, data)
 	data.Set("type", v.Type.ToString())
@@ -160,7 +159,6 @@ func resourceTokenIntrospectorRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceTokenIntrospectorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
 	client := meta.(*aidbox.Client)
 	q := mapTokenIntrospectorFromData(d)
 	ti, err := client.UpdateTokenIntrospector(ctx, q)
@@ -172,8 +170,6 @@ func resourceTokenIntrospectorUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceTokenIntrospectorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
 	client := meta.(*aidbox.Client)
 	err := client.DeleteTokenIntrospector(ctx, d.Id())
 	if err != nil {
