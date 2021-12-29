@@ -11,7 +11,7 @@ type AccessPolicy struct {
 	ResourceBase
 	Description string             `json:"description,omitempty"`
 	Engine      AccessPolicyEngine `json:"engine"`
-	Schema      *json.RawMessage   `json:"schema,omitempty"`
+	Schema      json.RawMessage    `json:"schema,omitempty"`
 	Link        string             `json:"link,omitempty"`
 }
 
