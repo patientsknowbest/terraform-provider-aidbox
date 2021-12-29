@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-scaffolding/internal/aidbox"
+	"github.com/patientsknowbest/terraform-provider-aidbox/internal/aidbox"
 )
 
 func init() {

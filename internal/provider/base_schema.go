@@ -1,6 +1,13 @@
 package provider
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/patientsknowbest/terraform-provider-aidbox/internal/aidbox"
+)
+
+//const (
+//	aidboxTimeFormat = "2006-01-02T15:04:05.999999Z07:00"
+//)
 
 func baseResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
@@ -38,4 +45,47 @@ func resourceFullSchema(resourceSchema map[string]*schema.Schema) map[string]*sc
 		fullSchema[k] = v
 	}
 	return fullSchema
+}
+
+func mapResourceBaseToData(v *aidbox.ResourceBase, data *schema.ResourceData) {
+	if v.ID != "" {
+		data.SetId(v.ID)
+	}
+	//if v.Meta != nil {
+	//	meta := map[string]interface{}{}
+	//	if v.Meta.VersionId != "" {
+	//		meta["version_id"] = v.Meta.VersionId
+	//	}
+	//	if v.Meta.CreatedAt != nil {
+	//		meta["created_at"] = v.Meta.CreatedAt.Format(aidboxTimeFormat)
+	//	}
+	//	if v.Meta.LastUpdated != nil {
+	//		meta["last_updated"] = v.Meta.LastUpdated.Format(aidboxTimeFormat)
+	//	}
+	//	data.Set("meta", meta)
+	//}
+}
+
+func mapResourceBaseFromData(d *schema.ResourceData) aidbox.ResourceBase {
+	res := aidbox.ResourceBase{}
+	res.ID = d.Id()
+	//if v, ok := d.GetOk("meta"); ok {
+	//	meta := v.([]interface{})[0].(map[string]interface{}) // Ugly
+	//	mm := &aidbox.ResourceBaseMeta{}
+	//	if vv, ok := meta["created_at"]; ok {
+	//		if vvv, err := time.Parse(aidboxTimeFormat, vv.(string)); err != nil {
+	//			mm.CreatedAt = &vvv
+	//		}
+	//	}
+	//	if vv, ok := meta["last_updated"]; ok {
+	//		if vvv, err := time.Parse(aidboxTimeFormat, vv.(string)); err != nil {
+	//			mm.LastUpdated = &vvv
+	//		}
+	//	}
+	//	if vv, ok := meta["version_id"]; ok {
+	//		mm.VersionId = vv.(string)
+	//	}
+	//	res.Meta = mm
+	//}
+	return res
 }

@@ -2,13 +2,27 @@ package provider
 
 import (
 	"context"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-scaffolding/internal/aidbox"
+	"github.com/patientsknowbest/terraform-provider-aidbox/internal/aidbox"
+	"log"
 )
 
 func resourceSchemaTokenIntrospector() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"type": {
+			Description: "Type of token introspector. One of (opaque|jwt)",
+			Type:        schema.TypeString,
+			Required:    true,
+			ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
+				_, err := aidbox.ParseTokenIntrospectorType(i.(string))
+				if err != nil {
+					return diag.FromErr(err)
+				}
+				return nil
+			},
+		},
 		"introspection_endpoint": {
 			// This description is used by the documentation generator and the language server.
 			Description: "Configuration for introspecting opaque access tokens.",
@@ -69,55 +83,10 @@ func resourceTokenIntrospector() *schema.Resource {
 	}
 }
 
-//const (
-//	aidboxTimeFormat = "2006-01-02T15:04:05.999999Z07:00"
-//)
-
-func mapResourceBaseToData(v *aidbox.ResourceBase, data *schema.ResourceData) {
-	if v.ID != "" {
-		data.SetId(v.ID)
-	}
-	//if v.Meta != nil {
-	//	meta := map[string]interface{}{}
-	//	if v.Meta.VersionId != "" {
-	//		meta["version_id"] = v.Meta.VersionId
-	//	}
-	//	if v.Meta.CreatedAt != nil {
-	//		meta["created_at"] = v.Meta.CreatedAt.Format(aidboxTimeFormat)
-	//	}
-	//	if v.Meta.LastUpdated != nil {
-	//		meta["last_updated"] = v.Meta.LastUpdated.Format(aidboxTimeFormat)
-	//	}
-	//	data.Set("meta", meta)
-	//}
-}
-
-func mapResourceBaseFromData(d *schema.ResourceData) aidbox.ResourceBase {
-	res := aidbox.ResourceBase{}
-	res.ID = d.Id()
-	//if v, ok := d.GetOk("meta"); ok {
-	//	meta := v.([]interface{})[0].(map[string]interface{}) // Ugly
-	//	mm := &aidbox.ResourceBaseMeta{}
-	//	if vv, ok := meta["created_at"]; ok {
-	//		if vvv, err := time.Parse(aidboxTimeFormat, vv.(string)); err != nil {
-	//			mm.CreatedAt = &vvv
-	//		}
-	//	}
-	//	if vv, ok := meta["last_updated"]; ok {
-	//		if vvv, err := time.Parse(aidboxTimeFormat, vv.(string)); err != nil {
-	//			mm.LastUpdated = &vvv
-	//		}
-	//	}
-	//	if vv, ok := meta["version_id"]; ok {
-	//		mm.VersionId = vv.(string)
-	//	}
-	//	res.Meta = mm
-	//}
-	return res
-}
-
 func mapTokenIntrospectorToData(v *aidbox.TokenIntrospector, data *schema.ResourceData) {
 	mapResourceBaseToData(&v.ResourceBase, data)
+	data.Set("type", v.Type.ToString())
+
 	if v.TokenIntrospectionEndpoint != nil {
 		data.Set("introspection_endpoint", map[string]interface{}{
 			"authorization": v.TokenIntrospectionEndpoint.Authorization,
@@ -140,6 +109,13 @@ func mapTokenIntrospectorFromData(d *schema.ResourceData) *aidbox.TokenIntrospec
 	vv := &aidbox.TokenIntrospector{
 		ResourceBase: mapResourceBaseFromData(d),
 	}
+
+	if tt, err := aidbox.ParseTokenIntrospectorType(d.Get("type").(string)); err == nil {
+		vv.Type = tt
+	} else {
+		log.Panicf("Error parsing token introspector type %v", err)
+	}
+
 	if v, ok := d.GetOk("introspection_endpoint"); ok {
 		introspectionEndpointData := v.([]interface{})[0].(map[string]interface{}) // Ugly
 		vv.TokenIntrospectionEndpoint = &aidbox.TokenIntrospectionEndpoint{
@@ -157,6 +133,7 @@ func mapTokenIntrospectorFromData(d *schema.ResourceData) *aidbox.TokenIntrospec
 			Secret: jwtData["secret"].(string),
 		}
 	}
+
 	return vv
 }
 
