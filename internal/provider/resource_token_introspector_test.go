@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccResourceTokenIntrospector_jwt(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
@@ -24,7 +24,7 @@ func TestAccResourceTokenIntrospector_jwt(t *testing.T) {
 }
 
 func TestAccResourceTokenIntrospector_opaque(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{

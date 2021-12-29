@@ -88,10 +88,11 @@ func mapTokenIntrospectorToData(v *aidbox.TokenIntrospector, data *schema.Resour
 	data.Set("type", v.Type.ToString())
 
 	if v.TokenIntrospectionEndpoint != nil {
-		data.Set("introspection_endpoint", map[string]interface{}{
+		ti := map[string]interface{}{
 			"authorization": v.TokenIntrospectionEndpoint.Authorization,
 			"url":           v.TokenIntrospectionEndpoint.URL,
-		})
+		}
+		data.Set("introspection_endpoint", []interface{}{ti})
 	}
 	if v.JWKSURI != "" {
 		data.Set("jwks_uri", v.JWKSURI)
