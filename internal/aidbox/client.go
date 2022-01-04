@@ -18,6 +18,8 @@ type Client struct {
 
 type AidboxError string
 
+const NotFoundError AidboxError = "Not found"
+
 func (t AidboxError) Error() string {
 	return string(t)
 }
@@ -88,6 +90,10 @@ func (client *Client) getResource(ctx context.Context, relativePath string) (Res
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil, NotFoundError
 	}
 
 	if res.StatusCode != http.StatusOK {

@@ -151,7 +151,8 @@ func resourceTokenIntrospectorCreate(ctx context.Context, d *schema.ResourceData
 func resourceTokenIntrospectorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
 	res, err := client.GetTokenIntrospector(ctx, d.Id())
-	if err != nil {
+
+	if handleNotFoundError(err, d) != nil {
 		return diag.FromErr(err)
 	}
 	mapTokenIntrospectorToData(res, d)
