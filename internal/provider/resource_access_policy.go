@@ -64,7 +64,10 @@ func resourceAccessPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 func resourceAccessPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
 	res, err := client.GetAccessPolicy(ctx, d.Id())
-	if handleNotFoundError(err, d) != nil {
+	if err != nil {
+		if handleNotFoundError(err, d) {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 	mapAccessPolicyToData(res, d)

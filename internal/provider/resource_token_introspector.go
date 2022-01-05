@@ -152,7 +152,10 @@ func resourceTokenIntrospectorRead(ctx context.Context, d *schema.ResourceData, 
 	client := meta.(*aidbox.Client)
 	res, err := client.GetTokenIntrospector(ctx, d.Id())
 
-	if handleNotFoundError(err, d) != nil {
+	if err != nil {
+		if handleNotFoundError(err, d) {
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 	mapTokenIntrospectorToData(res, d)
