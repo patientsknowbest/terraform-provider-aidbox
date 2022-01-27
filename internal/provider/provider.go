@@ -47,10 +47,7 @@ func New(client *aidbox.Client) func() *schema.Provider {
 					DefaultFunc: schema.EnvDefaultFunc("AIDBOX_URL", "http://localhost:8888/"),
 				},
 			},
-			DataSourcesMap: map[string]*schema.Resource{
-				"aidbox_token_introspector": dataSourceTokenIntrospector(),
-				"aidbox_access_policy":      dataSourceAccessPolicy(),
-			},
+			DataSourcesMap: map[string]*schema.Resource{},
 			ResourcesMap: map[string]*schema.Resource{
 				"aidbox_token_introspector": resourceTokenIntrospector(),
 				"aidbox_access_policy":      resourceAccessPolicy(),
