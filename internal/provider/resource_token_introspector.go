@@ -140,7 +140,7 @@ func mapTokenIntrospectorFromData(d *schema.ResourceData) *aidbox.TokenIntrospec
 func resourceTokenIntrospectorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
 	q := mapTokenIntrospectorFromData(d)
-	res, err := client.CreateTokenIntrospector(ctx, q)
+	res, err := client.CreateTokenIntrospector(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -150,7 +150,7 @@ func resourceTokenIntrospectorCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceTokenIntrospectorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
-	res, err := client.GetTokenIntrospector(ctx, d.Id())
+	res, err := client.GetTokenIntrospector(ctx, d.Id(), boxIdFromData(d))
 
 	if err != nil {
 		if handleNotFoundError(err, d) {
@@ -165,7 +165,7 @@ func resourceTokenIntrospectorRead(ctx context.Context, d *schema.ResourceData, 
 func resourceTokenIntrospectorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
 	q := mapTokenIntrospectorFromData(d)
-	ti, err := client.UpdateTokenIntrospector(ctx, q)
+	ti, err := client.UpdateTokenIntrospector(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -175,7 +175,7 @@ func resourceTokenIntrospectorUpdate(ctx context.Context, d *schema.ResourceData
 
 func resourceTokenIntrospectorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
-	err := client.DeleteTokenIntrospector(ctx, d.Id())
+	err := client.DeleteTokenIntrospector(ctx, d.Id(), boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}

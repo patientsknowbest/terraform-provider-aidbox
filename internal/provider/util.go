@@ -14,3 +14,12 @@ func handleNotFoundError(err error, data *schema.ResourceData) bool {
 	}
 	return false
 }
+
+func boxIdFromData(d *schema.ResourceData) string {
+	boxId, ok := d.GetOk("box_id")
+	if ok {
+		return boxId.(string)
+	} else {
+		return ""
+	}
+}

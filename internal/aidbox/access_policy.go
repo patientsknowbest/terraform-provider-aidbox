@@ -90,30 +90,30 @@ func (g *AccessPolicyEngine) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (client *Client) CreateAccessPolicy(ctx context.Context, accessPolicy *AccessPolicy) (*AccessPolicy, error) {
-	ap, err := client.createResource(ctx, accessPolicy)
+func (client *Client) CreateAccessPolicy(ctx context.Context, accessPolicy *AccessPolicy, boxId string) (*AccessPolicy, error) {
+	ap, err := client.createResource(ctx, accessPolicy, boxId)
 	if err != nil {
 		return nil, err
 	}
 	return ap.(*AccessPolicy), nil
 }
 
-func (client *Client) GetAccessPolicy(ctx context.Context, id string) (*AccessPolicy, error) {
-	rr, err := client.getResource(ctx, "/AccessPolicy/"+id)
+func (client *Client) GetAccessPolicy(ctx context.Context, id, boxId string) (*AccessPolicy, error) {
+	rr, err := client.getResource(ctx, "/AccessPolicy/"+id, boxId)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*AccessPolicy), nil
 }
 
-func (client *Client) UpdateAccessPolicy(ctx context.Context, q *AccessPolicy) (*AccessPolicy, error) {
-	rr, err := client.updateResource(ctx, q)
+func (client *Client) UpdateAccessPolicy(ctx context.Context, q *AccessPolicy, boxId string) (*AccessPolicy, error) {
+	rr, err := client.updateResource(ctx, q, boxId)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*AccessPolicy), nil
 }
 
-func (client *Client) DeleteAccessPolicy(ctx context.Context, id string) error {
-	return client.deleteResource(ctx, "/AccessPolicy/"+id)
+func (client *Client) DeleteAccessPolicy(ctx context.Context, id, boxId string) error {
+	return client.deleteResource(ctx, "/AccessPolicy/"+id, boxId)
 }

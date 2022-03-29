@@ -1,20 +1,20 @@
 version: '3.8'
 services:
-  database:
+  database-devbox:
     image: "healthsamurai/aidboxdb:13.2"
     ports:
       - "5437:5432"
     environment:
       POSTGRES_USER:     "postgres"
       POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB:       "devbox"
+      POSTGRES_DB:       "postgres"
 
   devbox:
-    image: "healthsamurai/devbox:stable"
+    image: "healthsamurai/devbox:latest"
     ports:
       - "8888:8888"
     environment:
-      PGHOST: "database"
+      PGHOST: "database-devbox"
       AIDBOX_LICENSE_ID: "${AIDBOX_LICENSE_ID:?err}"
       AIDBOX_LICENSE_KEY: "${AIDBOX_LICENSE_KEY:?err}"
       AIDBOX_CLIENT_ID: "root"
@@ -26,5 +26,30 @@ services:
       PGPORT: "5432"
       PGUSER: "postgres"
       PGPASSWORD: "postgres"
-      PGDATABASE: "devbox"
+      PGDATABASE: "postgres"
 
+  database-multibox:
+    image: "healthsamurai/aidboxdb:13.2"
+    ports:
+      - "5438:5432"
+    environment:
+      POSTGRES_USER:     "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB:       "postgres"
+
+  multibox:
+    image: "healthsamurai/multibox:latest"
+    ports:
+      - "8889:8889"
+    environment:
+      AIDBOX_LICENSE: "${MB_LICENSE}"
+      AIDBOX_BASE_URL: "http://localhost:8889"
+      AIDBOX_SUPERUSER: "root:secret"
+      AIDBOX_CLUSTER_SECRET: "cluster_secret"
+      AIDBOX_CLUSTER_DOMAIN: "localhost"
+      AIDBOX_PORT: "8889"
+      PGHOST: "database-multibox"
+      PGPORT: "5432"
+      PGUSER: "postgres"
+      PGPASSWORD: "postgres"
+      PGDATABASE: "postgres"

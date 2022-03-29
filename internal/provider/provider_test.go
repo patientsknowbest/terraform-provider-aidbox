@@ -12,8 +12,10 @@ import (
 // The factory function will be invoked for every Terraform CLI command executed
 // to create a provider server to which the CLI can reattach.
 var (
-	testProvider          *schema.Provider
-	testProviderFactories map[string]func() (*schema.Provider, error)
+	testProvider                  *schema.Provider
+	testMultiboxProvider          *schema.Provider
+	testProviderFactories         map[string]func() (*schema.Provider, error)
+	testMultiboxProviderFactories map[string]func() (*schema.Provider, error)
 )
 
 func envOrDefault(env string, df string) string {
@@ -26,17 +28,31 @@ func envOrDefault(env string, df string) string {
 }
 
 func init() {
-	client := aidbox.NewClient(envOrDefault("AIDBOX_URL", "http://localhost:8888"), envOrDefault("AIDBOX_CLIENT", "root"), envOrDefault("AIDBOX_CLIENT_SECRET", "secret"))
+	client := aidbox.NewClient(envOrDefault("AIDBOX_URL", "http://localhost:8888"), envOrDefault("AIDBOX_CLIENT", "root"), envOrDefault("AIDBOX_CLIENT_SECRET", "secret"), false)
 	testProvider = New(client)()
 	testProviderFactories = map[string]func() (*schema.Provider, error){
 		"aidbox": func() (*schema.Provider, error) {
 			return testProvider, nil
 		},
 	}
+
+	client2 := aidbox.NewClient(envOrDefault("MULTIBOX_URL", "http://localhost:8889"), envOrDefault("AIDBOX_CLIENT", "root"), envOrDefault("AIDBOX_CLIENT_SECRET", "secret"), true)
+	testMultiboxProvider = New(client2)()
+	testMultiboxProviderFactories = map[string]func() (*schema.Provider, error){
+		"aidbox": func() (*schema.Provider, error) {
+			return testMultiboxProvider, nil
+		},
+	}
 }
 
 func TestProvider(t *testing.T) {
 	if err := testProvider.InternalValidate(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestMultiboxProvider(t *testing.T) {
+	if err := testMultiboxProvider.InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }

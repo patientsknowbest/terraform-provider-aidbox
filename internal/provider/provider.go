@@ -46,11 +46,18 @@ func New(client *aidbox.Client) func() *schema.Provider {
 					Required:    true,
 					DefaultFunc: schema.EnvDefaultFunc("AIDBOX_URL", "http://localhost:8888/"),
 				},
+				"is_multibox": {
+					Type:        schema.TypeBool,
+					Description: "true if this is a multibox instance",
+					Default:     false,
+					Optional:    true,
+				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{},
 			ResourcesMap: map[string]*schema.Resource{
 				"aidbox_token_introspector": resourceTokenIntrospector(),
 				"aidbox_access_policy":      resourceAccessPolicy(),
+				"aidbox_box":                resourceBox(),
 			},
 		}
 
@@ -83,7 +90,9 @@ func New(client *aidbox.Client) func() *schema.Provider {
 			if !ok {
 				return nil, diag.Errorf("client_secret is wrong type")
 			}
-			return aidbox.NewClient(url, clientId, clientSecret), nil
+			isMultiboxI, ok := rd.GetOk("is_multibox")
+			isMultibox := ok && isMultiboxI.(bool)
+			return aidbox.NewClient(url, clientId, clientSecret, isMultibox), nil
 		}
 
 		return p

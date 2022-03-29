@@ -9,8 +9,14 @@ import (
 //	aidboxTimeFormat = "2006-01-02T15:04:05.999999Z07:00"
 //)
 
-func baseResourceSchema() map[string]*schema.Schema {
+func baseBoxResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"box_id": {
+			Description: "ID of box this object lives in",
+			Type:        schema.TypeString,
+			Default:     "",
+			Optional:    true,
+		},
 		//"meta": {
 		//	Description: "Metadata for the resource",
 		//	Type:        schema.TypeList,
@@ -38,7 +44,7 @@ func baseResourceSchema() map[string]*schema.Schema {
 
 func resourceFullSchema(resourceSchema map[string]*schema.Schema) map[string]*schema.Schema {
 	fullSchema := make(map[string]*schema.Schema, 0)
-	for k, v := range baseResourceSchema() {
+	for k, v := range baseBoxResourceSchema() {
 		fullSchema[k] = v
 	}
 	for k, v := range resourceSchema {

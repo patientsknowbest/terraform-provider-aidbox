@@ -53,7 +53,7 @@ func mapAccessPolicyFromData(d *schema.ResourceData) *aidbox.AccessPolicy {
 func resourceAccessPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
 	q := mapAccessPolicyFromData(d)
-	res, err := client.CreateAccessPolicy(ctx, q)
+	res, err := client.CreateAccessPolicy(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -63,7 +63,7 @@ func resourceAccessPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 
 func resourceAccessPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
-	res, err := client.GetAccessPolicy(ctx, d.Id())
+	res, err := client.GetAccessPolicy(ctx, d.Id(), boxIdFromData(d))
 	if err != nil {
 		if handleNotFoundError(err, d) {
 			return nil
@@ -77,7 +77,7 @@ func resourceAccessPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 func resourceAccessPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
 	q := mapAccessPolicyFromData(d)
-	ti, err := client.UpdateAccessPolicy(ctx, q)
+	ti, err := client.UpdateAccessPolicy(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -87,7 +87,7 @@ func resourceAccessPolicyUpdate(ctx context.Context, d *schema.ResourceData, met
 
 func resourceAccessPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*aidbox.Client)
-	err := client.DeleteAccessPolicy(ctx, d.Id())
+	err := client.DeleteAccessPolicy(ctx, d.Id(), boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
