@@ -22,6 +22,7 @@ func mapBoxToData(res *aidbox.Box, data *schema.ResourceData) {
 	data.Set("name", res.ID)
 	data.Set("fhir_version", res.FhirVersion)
 	data.Set("description", res.Description)
+	data.Set("box_url", res.BoxURL)
 }
 
 func mapBoxFromData(d *schema.ResourceData) *aidbox.Box {
@@ -29,6 +30,7 @@ func mapBoxFromData(d *schema.ResourceData) *aidbox.Box {
 	res.ID = d.Get("name").(string)
 	res.Description = d.Get("description").(string)
 	res.FhirVersion = d.Get("fhir_version").(string)
+	res.BoxURL = d.Get("box_url").(string)
 	return res
 }
 
@@ -91,11 +93,11 @@ func resourceSchemaBox() map[string]*schema.Schema {
 		// 	Optional:    true,
 		// 	ForceNew:    true,
 		// },
-		//"box_url": {
-		//	Type:     schema.TypeString,
-		//	Optional: true,
-		//	ForceNew: true,
-		//},
+		"box_url": {
+			Description: "URL for accessing the box",
+			Type:        schema.TypeString,
+			Computed:    true,
+		},
 		//"access_url": {
 		//	Type:     schema.TypeString,
 		//	Optional: true,

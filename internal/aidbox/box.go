@@ -19,9 +19,17 @@ func (*Box) GetResourceName() string {
 }
 
 func (client *Client) CreateBox(ctx context.Context, box *Box) (*Box, error) {
-	resultBox := Box{}
-	err := client.rpcRequest(ctx, "multibox/create-box", box, &resultBox, "")
-	return &resultBox, err
+	resultBox := &Box{}
+	err := client.rpcRequest(ctx, "multibox/create-box", box, resultBox, "")
+	if err != nil {
+		return nil, err
+	}
+	// Not all the data are returned from the create-box operation, so call GetBot again to get the full thing
+	resultBox, err = client.GetBox(ctx, resultBox.ID)
+	if err != nil {
+		return nil, err
+	}
+	return resultBox, err
 }
 
 func (client *Client) GetBox(ctx context.Context, id string) (*Box, error) {
