@@ -43,10 +43,10 @@ services:
       - "8889:8889"
     environment:
       AIDBOX_LICENSE: "${MB_LICENSE}"
-      AIDBOX_BASE_URL: "http://localhost:8889"
+      AIDBOX_BASE_URL: "http://box.local:8889"
       AIDBOX_SUPERUSER: "root:secret"
       AIDBOX_CLUSTER_SECRET: "cluster_secret"
-      AIDBOX_CLUSTER_DOMAIN: "localhost"
+      AIDBOX_CLUSTER_DOMAIN: "box.local"
       AIDBOX_PORT: "8889"
       PGHOST: "database-multibox"
       PGPORT: "5432"

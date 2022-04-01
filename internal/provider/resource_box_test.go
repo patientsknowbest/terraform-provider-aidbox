@@ -15,7 +15,7 @@ func TestAccResourceBox(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("aidbox_box.mybox", "id", "mybox"),
 					resource.TestCheckResourceAttr("aidbox_box.mybox", "fhir_version", "fhir-3.0.1"),
-					resource.TestCheckResourceAttr("aidbox_box.mybox", "box_url", "http://mybox.localhost:8889"),
+					resource.TestCheckResourceAttr("aidbox_box.mybox", "box_url", "http://mybox.box.local:8889"),
 				),
 			},
 		},

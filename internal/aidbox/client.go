@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 type Client struct {
@@ -69,16 +70,12 @@ func (client *Client) createResource(ctx context.Context, resource Resource, box
 	if err != nil {
 		return nil, err
 	}
-	url, err := client.getURL(ctx, boxId)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url+"/"+resource.GetResourceName(), &buf)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, client.URL+"/"+resource.GetResourceName(), &buf)
 	if err != nil {
 		return nil, err
 	}
 
-	err = client.addAuth(ctx, req, boxId)
+	err = client.addAuthAndHost(ctx, req, boxId)
 	if err != nil {
 		return nil, err
 	}
@@ -98,15 +95,11 @@ func (client *Client) createResource(ctx context.Context, resource Resource, box
 }
 
 func (client *Client) getResource(ctx context.Context, relativePath, boxId string) (Resource, error) {
-	url, err := client.getURL(ctx, boxId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, client.URL+relativePath, nil)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url+relativePath, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = client.addAuth(ctx, req, boxId)
+	err = client.addAuthAndHost(ctx, req, boxId)
 	if err != nil {
 		return nil, err
 	}
@@ -137,15 +130,11 @@ func (client *Client) updateResource(ctx context.Context, resource Resource, box
 		return nil, err
 	}
 	log.Printf("[TRACE] sending [[ %s ]]", buf.String())
-	url, err := client.getURL(ctx, boxId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, client.URL+"/"+resource.GetResourceName()+"/"+resource.GetID(), &buf)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url+"/"+resource.GetResourceName()+"/"+resource.GetID(), &buf)
-	if err != nil {
-		return nil, err
-	}
-	err = client.addAuth(ctx, req, boxId)
+	err = client.addAuthAndHost(ctx, req, boxId)
 	if err != nil {
 		return nil, err
 	}
@@ -165,15 +154,11 @@ func (client *Client) updateResource(ctx context.Context, resource Resource, box
 }
 
 func (client *Client) deleteResource(ctx context.Context, relativePath, boxId string) error {
-	url, err := client.getURL(ctx, boxId)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, client.URL+relativePath, nil)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url+relativePath, nil)
-	if err != nil {
-		return err
-	}
-	err = client.addAuth(ctx, req, boxId)
+	err = client.addAuthAndHost(ctx, req, boxId)
 	if err != nil {
 		return err
 	}
@@ -208,15 +193,11 @@ func (client *Client) rpcRequest(ctx context.Context, method string, request int
 	if err != nil {
 		return err
 	}
-	url, err := client.getURL(ctx, boxId)
+	req, err := http.NewRequestWithContext(ctx, "POST", client.URL+"/rpc", bytes.NewBuffer(wr))
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, "POST", url+"/rpc", bytes.NewBuffer(wr))
-	if err != nil {
-		return err
-	}
-	err = client.addAuth(ctx, req, boxId)
+	err = client.addAuthAndHost(ctx, req, boxId)
 	if err != nil {
 		return err
 	}
@@ -241,9 +222,10 @@ func (client *Client) rpcRequest(ctx context.Context, method string, request int
 	return json.Unmarshal(response.Result, responseT)
 }
 
-/// Adds appropriate authentication header to a request.
+/// Adds appropriate Authorization/Cookie & Host header to a request.
 /// For multibox, we're expected to get the access-token from multibox API and use that.
-func (client *Client) addAuth(ctx context.Context, req *http.Request, boxId string) error {
+/// and multibox will route our request to the appropriate box based on
+func (client *Client) addAuthAndHost(ctx context.Context, req *http.Request, boxId string) error {
 	if boxId == "" {
 		req.SetBasicAuth(client.Username, client.Password)
 	} else {
@@ -251,22 +233,18 @@ func (client *Client) addAuth(ctx context.Context, req *http.Request, boxId stri
 		if err != nil {
 			return err
 		}
+		boxURL, err := url.Parse(box.BoxURL)
+		if err != nil {
+			return err
+		}
+		tflog.Info(ctx, "addAuthAndHost", map[string]interface{}{
+			"hostname":     boxURL.Hostname(),
+			"access_token": box.AccessToken,
+		})
+		req.Host = boxURL.Hostname()
 		req.Header.Set("Cookie", fmt.Sprintf("aidbox-auth-token=%s", box.AccessToken))
 	}
 	return nil
-}
-
-/// Get the URL for an API call for the given box.
-/// boxId may be empty if we're not using multibox
-func (client *Client) getURL(ctx context.Context, boxId string) (string, error) {
-	if boxId == "" {
-		return client.URL, nil
-	}
-	box, err := client.getBox(ctx, boxId)
-	if err != nil {
-		return "", err
-	}
-	return box.BoxURL, nil
 }
 
 func (client *Client) getBox(ctx context.Context, boxId string) (*Box, error) {
