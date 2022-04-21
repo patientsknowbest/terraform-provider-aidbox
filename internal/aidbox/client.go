@@ -85,7 +85,11 @@ func (client *Client) createResource(ctx context.Context, resource Resource, box
 		return nil, err
 	}
 	if res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("Unexpected status code received %d %s", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("unexpected status code received %d %s", res.StatusCode, res.Status)
+	}
+	err = client.clearCache(ctx, boxId)
+	if err != nil {
+		return nil, err
 	}
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -114,7 +118,7 @@ func (client *Client) getResource(ctx context.Context, relativePath, boxId strin
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Unexpected status code %d %s", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
 	}
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -144,7 +148,11 @@ func (client *Client) updateResource(ctx context.Context, resource Resource, box
 		return nil, err
 	}
 	if !isAlright(res.StatusCode) {
-		return nil, fmt.Errorf("Unexpected status code %d %s", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
+	}
+	err = client.clearCache(ctx, boxId)
+	if err != nil {
+		return nil, err
 	}
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -167,9 +175,9 @@ func (client *Client) deleteResource(ctx context.Context, relativePath, boxId st
 		return err
 	}
 	if !isAlright(res.StatusCode) {
-		return fmt.Errorf("Unexpected status code %d %s", res.StatusCode, res.Status)
+		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
 	}
-	return nil
+	return client.clearCache(ctx, boxId)
 }
 
 /// Some resources (multibox box management API for instance) are accessible only through the RPC endpoint
@@ -259,4 +267,27 @@ func (client *Client) getBox(ctx context.Context, boxId string) (*Box, error) {
 		return nil, err
 	}
 	return &box, nil
+}
+
+/// Some objects don't invalidate cache properly.
+/// perform a cache reset to work around it
+/// https://github.com/Aidbox/Issues/issues/501
+/// https://docs.aidbox.app/api-1/cache
+func (client *Client) clearCache(ctx context.Context, boxId string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, client.URL+"/$drop-cache", nil)
+	if err != nil {
+		return err
+	}
+	err = client.addAuthAndHost(ctx, req, boxId)
+	if err != nil {
+		return err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if !isAlright(res.StatusCode) {
+		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
+	}
+	return nil
 }

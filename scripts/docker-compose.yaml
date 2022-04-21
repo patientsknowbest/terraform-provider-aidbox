@@ -10,7 +10,8 @@ services:
       POSTGRES_DB:       "postgres"
 
   devbox:
-    image: "healthsamurai/devbox:latest"
+    # :edge, pinned on 21/04/2022
+    image: "healthsamurai/devbox@sha256:ed6b97c7ebf5cacd7f4b1979e4d22b636402e31df35e3a9a0e8749313a2fa9ff"
     ports:
       - "8888:8888"
     environment:
@@ -38,11 +39,12 @@ services:
       POSTGRES_DB:       "postgres"
 
   multibox:
-    image: "healthsamurai/multibox:latest"
+    # :edge, pinned on 21/04/2022
+    image: "healthsamurai/multibox@sha256:c6fa0f7e37cc4456b0b104284dbbd38e25f486cfc1bf90c556c132c80a4d1f6e"
     ports:
       - "8889:8889"
     environment:
-      AIDBOX_LICENSE: "${MB_LICENSE}"
+      AIDBOX_LICENSE: "${MB_LICENSE:?err}"
       AIDBOX_BASE_URL: "http://box.local:8889"
       AIDBOX_SUPERUSER: "root:secret"
       AIDBOX_CLUSTER_SECRET: "cluster_secret"
