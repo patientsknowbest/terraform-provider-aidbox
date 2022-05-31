@@ -1,7 +1,8 @@
 version: '3.8'
 services:
   database-devbox:
-    image: "healthsamurai/aidboxdb:13.2"
+    # :13.2, pinned on 2022-05-31
+    image: "healthsamurai/aidboxdb@sha256:df7e461f6010eb9746c9361b7a3b83bea9217ac8fe6597cb88026a5f4f83ad8e"
     ports:
       - "5437:5432"
     environment:
@@ -10,8 +11,8 @@ services:
       POSTGRES_DB:       "postgres"
 
   devbox:
-    # :edge, pinned on 21/04/2022
-    image: "healthsamurai/devbox@sha256:ed6b97c7ebf5cacd7f4b1979e4d22b636402e31df35e3a9a0e8749313a2fa9ff"
+    # :edge, pinned on 2022-05-31
+    image: "healthsamurai/devbox@sha256:98e4909e8bb5fd2508bf3c9ed45be629523c381d3d84b3587f3a204f31e3fc2d"
     ports:
       - "8888:8888"
     environment:
@@ -30,7 +31,8 @@ services:
       PGDATABASE: "postgres"
 
   database-multibox:
-    image: "healthsamurai/aidboxdb:13.2"
+    # :13.2, pinned on 2022-05-31
+    image: "healthsamurai/aidboxdb@sha256:df7e461f6010eb9746c9361b7a3b83bea9217ac8fe6597cb88026a5f4f83ad8e"
     ports:
       - "5438:5432"
     environment:
@@ -39,8 +41,8 @@ services:
       POSTGRES_DB:       "postgres"
 
   multibox:
-    # :edge, pinned on 21/04/2022
-    image: "healthsamurai/multibox@sha256:c6fa0f7e37cc4456b0b104284dbbd38e25f486cfc1bf90c556c132c80a4d1f6e"
+    # :edge, pinned on 2022-05-31
+    image: "healthsamurai/multibox@sha256:ac1041ef65c1fcb80fe82cb233eff2c2d94858a198a3c7eb33c33431b38eaa78"
     ports:
       - "8889:8889"
     environment:

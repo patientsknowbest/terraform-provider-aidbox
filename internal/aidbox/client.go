@@ -87,7 +87,7 @@ func (client *Client) createResource(ctx context.Context, resource Resource, box
 	if res.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("unexpected status code received %d %s", res.StatusCode, res.Status)
 	}
-	err = client.clearCache(ctx, boxId)
+	err = client.clearCache(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (client *Client) updateResource(ctx context.Context, resource Resource, box
 	if !isAlright(res.StatusCode) {
 		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
 	}
-	err = client.clearCache(ctx, boxId)
+	err = client.clearCache(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func (client *Client) deleteResource(ctx context.Context, relativePath, boxId st
 	if !isAlright(res.StatusCode) {
 		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
 	}
-	return client.clearCache(ctx, boxId)
+	return client.clearCache(ctx)
 }
 
 /// Some resources (multibox box management API for instance) are accessible only through the RPC endpoint
@@ -269,25 +269,21 @@ func (client *Client) getBox(ctx context.Context, boxId string) (*Box, error) {
 	return &box, nil
 }
 
-/// Some objects don't invalidate cache properly.
-/// perform a cache reset to work around it
+/// Some objects don't invalidate cache properly in multibox.
+/// perform a cache reset to work around it.
 /// https://github.com/Aidbox/Issues/issues/501
-/// https://docs.aidbox.app/api-1/cache
-func (client *Client) clearCache(ctx context.Context, boxId string) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, client.URL+"/$drop-cache", nil)
+/// https://docs.aidbox.app/multibox/multibox-box-manager-api#multibox-drop-box-caches
+func (client *Client) clearCache(ctx context.Context) error {
+	if !client.IsMultibox {
+		return nil
+	}
+	var response string
+	err := client.rpcRequest(ctx, "multibox/drop-box-caches", struct{}{}, &response, "")
 	if err != nil {
 		return err
 	}
-	err = client.addAuthAndHost(ctx, req, boxId)
-	if err != nil {
-		return err
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	if !isAlright(res.StatusCode) {
-		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
+	if response != "ok" {
+		return fmt.Errorf("unexpected response to multibox/drop-box-caches: %s", response)
 	}
 	return nil
 }
