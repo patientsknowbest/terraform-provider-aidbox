@@ -51,6 +51,6 @@ You can start aidbox in docker with the provided [docker-compose](scripts/docker
 Trial license can be obtained as per [aidbox documentation](https://docs.aidbox.app/getting-started/installation/setup-aidbox.dev)
 
 ```sh
-$ (cd scripts && AIDBOX_LICENSE_ID=<your-license-id> AIDBOX_LICENSE_KEY=<your-license-key> docker-compose up -d)
+$ (cd scripts && AIDBOX_LICENSE_ID=<your-devbox-license-id> AIDBOX_LICENSE_KEY=<your-devbox-license-key> MB_LICENSE=<your-multibox-license> docker-compose up -d)
 $ make testacc
 ```
