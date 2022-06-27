@@ -58,6 +58,7 @@ func New(client *aidbox.Client) func() *schema.Provider {
 				"aidbox_token_introspector": resourceTokenIntrospector(),
 				"aidbox_access_policy":      resourceAccessPolicy(),
 				"aidbox_box":                resourceBox(),
+				"aidbox_auth_client":        resourceAuthClient(),
 			},
 		}
 

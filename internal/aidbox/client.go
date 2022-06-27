@@ -57,6 +57,8 @@ func parseResource(in []byte) (Resource, error) {
 		r = &TokenIntrospector{}
 	case "AccessPolicy":
 		r = &AccessPolicy{}
+	case "Client":
+		r = &AuthClient{}
 	default:
 		return nil, fmt.Errorf("Unsupported resource type %s", s.ResourceType)
 	}
