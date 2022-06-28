@@ -20,6 +20,11 @@ func resourceAuthClient() *schema.Resource {
 
 func resourceSchemaAuthClient() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"name": {
+			Description: "Client ID used for authentication",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
 		"secret": {
 			Description: "Client secret used for authentication",
 			Type:        schema.TypeString,
@@ -39,13 +44,14 @@ func resourceSchemaAuthClient() map[string]*schema.Schema {
 
 func mapAuthClientToData(res *aidbox.AuthClient, data *schema.ResourceData) {
 	data.SetId(res.ID)
+	data.Set("name", res.ID)
 	data.Set("secret", res.Secret)
 	data.Set("grant_types", res.GrantTypes)
 }
 
 func mapAuthClientFromData(d *schema.ResourceData) *aidbox.AuthClient {
 	res := &aidbox.AuthClient{}
-	res.ID = d.Id()
+	res.ID = d.Get("name").(string)
 	res.Secret = d.Get("secret").(string)
 	res.GrantTypes = d.Get("grant_types").([]interface{})
 	return res

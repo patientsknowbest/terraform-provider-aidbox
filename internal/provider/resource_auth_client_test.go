@@ -13,6 +13,7 @@ func TestAccResourceAuthClient_basic(t *testing.T) {
 			{
 				Config: testAccResourceAuthClient_basic,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_auth_client.example", "id", "my-client"),
 					resource.TestCheckResourceAttr("aidbox_auth_client.example", "secret", "secret"),
 					resource.TestCheckResourceAttr("aidbox_auth_client.example", "grant_types.0", "basic"),
 				),
@@ -23,6 +24,7 @@ func TestAccResourceAuthClient_basic(t *testing.T) {
 
 const testAccResourceAuthClient_basic = `
 resource "aidbox_auth_client" "example" {
+  name        = "my-client"
   secret      = "secret"
   grant_types = ["basic"]
 }

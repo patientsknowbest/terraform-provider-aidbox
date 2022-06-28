@@ -14,12 +14,12 @@ func (*AuthClient) GetResourceName() string {
 	return "Client"
 }
 
-func (client *Client) CreateAuthClient(ctx context.Context, basicClient *AuthClient, boxId string) (*AuthClient, error) {
-	ap, err := client.createResource(ctx, basicClient, boxId)
+func (client *Client) CreateAuthClient(ctx context.Context, authClient *AuthClient, boxId string) (*AuthClient, error) {
+	ac, err := client.createResource(ctx, authClient, boxId)
 	if err != nil {
 		return nil, err
 	}
-	return ap.(*AuthClient), nil
+	return ac.(*AuthClient), nil
 }
 
 func (client *Client) GetAuthClient(ctx context.Context, id, boxId string) (*AuthClient, error) {

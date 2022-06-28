@@ -14,6 +14,7 @@ Client https://docs.aidbox.app/security-and-access-control-1/auth/basic-auth.
 
 ```terraform
 resource "aidbox_auth_client" "example" {
+  name        = "my-client"
   secret      = "secret"
   grant_types = ["basic"]
 }
@@ -25,6 +26,7 @@ resource "aidbox_auth_client" "example" {
 ### Required
 
 - `grant_types` (List of String) Grant type used for authentication (basic)
+- `name` (String) Client ID used for authentication
 - `secret` (String) Client secret used for authentication
 
 ### Optional
