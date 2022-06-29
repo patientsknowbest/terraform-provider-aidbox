@@ -53,8 +53,11 @@ resource "aidbox_access_policy" "example" {
 
 - **box_id** (String) ID of box this object lives in
 - **description** (String) Description of access policy for human users.
-- **id** (String) The ID of this resource.
 - **link** (String) The actor to allow access. Used only if engine is allow.
 - **schema** (String) JSON-schema policy to be evaluated. Used only if engine is json-schema
+
+### Read-Only
+
+- **id** (String) The ID of this resource.
 
 

@@ -35,6 +35,10 @@ resource "aidbox_box" "my_box" {
 ### Optional
 
 - **description** (String) Description of box for human users.
+
+### Read-Only
+
+- **box_url** (String) URL for accessing the box
 - **id** (String) The ID of this resource.
 
 

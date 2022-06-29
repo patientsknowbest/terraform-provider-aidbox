@@ -35,9 +35,9 @@ func mapBoxFromData(d *schema.ResourceData) *aidbox.Box {
 }
 
 func resourceBoxCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
+	apiClient := meta.(*aidbox.ApiClient)
 	q := mapBoxFromData(d)
-	res, err := client.CreateBox(ctx, q)
+	res, err := apiClient.CreateBox(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -46,8 +46,8 @@ func resourceBoxCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceBoxRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
-	res, err := client.GetBox(ctx, d.Id())
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetBox(ctx, d.Id())
 	if err != nil {
 		if handleNotFoundError(err, d) {
 			return nil
@@ -59,8 +59,8 @@ func resourceBoxRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceBoxDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
-	err := client.DeleteBox(ctx, d.Id())
+	apiClient := meta.(*aidbox.ApiClient)
+	err := apiClient.DeleteBox(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

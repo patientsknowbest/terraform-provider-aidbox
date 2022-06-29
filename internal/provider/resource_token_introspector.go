@@ -138,9 +138,9 @@ func mapTokenIntrospectorFromData(d *schema.ResourceData) *aidbox.TokenIntrospec
 }
 
 func resourceTokenIntrospectorCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
+	apiClient := meta.(*aidbox.ApiClient)
 	q := mapTokenIntrospectorFromData(d)
-	res, err := client.CreateTokenIntrospector(ctx, q, boxIdFromData(d))
+	res, err := apiClient.CreateTokenIntrospector(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -149,8 +149,8 @@ func resourceTokenIntrospectorCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceTokenIntrospectorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
-	res, err := client.GetTokenIntrospector(ctx, d.Id(), boxIdFromData(d))
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetTokenIntrospector(ctx, d.Id(), boxIdFromData(d))
 
 	if err != nil {
 		if handleNotFoundError(err, d) {
@@ -163,9 +163,9 @@ func resourceTokenIntrospectorRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceTokenIntrospectorUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
+	apiClient := meta.(*aidbox.ApiClient)
 	q := mapTokenIntrospectorFromData(d)
-	ti, err := client.UpdateTokenIntrospector(ctx, q, boxIdFromData(d))
+	ti, err := apiClient.UpdateTokenIntrospector(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -174,8 +174,8 @@ func resourceTokenIntrospectorUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceTokenIntrospectorDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
-	err := client.DeleteTokenIntrospector(ctx, d.Id(), boxIdFromData(d))
+	apiClient := meta.(*aidbox.ApiClient)
+	err := apiClient.DeleteTokenIntrospector(ctx, d.Id(), boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
