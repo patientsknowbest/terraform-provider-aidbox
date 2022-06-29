@@ -207,6 +207,9 @@ func (client *Client) rpcRequest(ctx context.Context, method string, request int
 	if err != nil {
 		return err
 	}
+	if !isAlright(resp.StatusCode) {
+		return fmt.Errorf("unexpected status code from RPC request %d %v", resp.StatusCode, resp.Status)
+	}
 	defer func() { _ = resp.Body.Close() }()
 	var response struct {
 		Result json.RawMessage `json:"result,omitempty"`
