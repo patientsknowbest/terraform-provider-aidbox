@@ -89,10 +89,6 @@ func (apiClient *ApiClient) createResource(ctx context.Context, resource Resourc
 	if res.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("unexpected status code received %d %s", res.StatusCode, res.Status)
 	}
-	err = apiClient.clearCache(ctx)
-	if err != nil {
-		return nil, err
-	}
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
@@ -152,10 +148,6 @@ func (apiClient *ApiClient) updateResource(ctx context.Context, resource Resourc
 	if !isAlright(res.StatusCode) {
 		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
 	}
-	err = apiClient.clearCache(ctx)
-	if err != nil {
-		return nil, err
-	}
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
@@ -179,7 +171,7 @@ func (apiClient *ApiClient) deleteResource(ctx context.Context, relativePath, bo
 	if !isAlright(res.StatusCode) {
 		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
 	}
-	return apiClient.clearCache(ctx)
+	return nil
 }
 
 /// Some resources (multibox box management API for instance) are accessible only through the RPC endpoint
@@ -217,7 +209,10 @@ func (apiClient *ApiClient) rpcRequest(ctx context.Context, method string, reque
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	if !isAlright(resp.StatusCode) {
+		return fmt.Errorf("unexpected status code from RPC request %d %v", resp.StatusCode, resp.Status)
+	}
+	defer func() { _ = resp.Body.Close() }()
 	var response struct {
 		Result json.RawMessage `json:"result,omitempty"`
 		Error  json.RawMessage `json:"error,omitempty"`
@@ -269,23 +264,4 @@ func (apiClient *ApiClient) getBox(ctx context.Context, boxId string) (*Box, err
 		return nil, err
 	}
 	return &box, nil
-}
-
-/// Some objects don't invalidate cache properly in multibox.
-/// perform a cache reset to work around it.
-/// https://github.com/Aidbox/Issues/issues/501
-/// https://docs.aidbox.app/multibox/multibox-box-manager-api#multibox-drop-box-caches
-func (apiClient *ApiClient) clearCache(ctx context.Context) error {
-	if !apiClient.IsMultibox {
-		return nil
-	}
-	var response string
-	err := apiClient.rpcRequest(ctx, "multibox/drop-box-caches", struct{}{}, &response, "")
-	if err != nil {
-		return err
-	}
-	if response != "ok" {
-		return fmt.Errorf("unexpected response to multibox/drop-box-caches: %s", response)
-	}
-	return nil
 }

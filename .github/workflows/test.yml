@@ -1,20 +1,8 @@
-# This GitHub action runs your tests for each commit push and/or PR. Optionally
-# you can turn it on using a cron schedule for regular testing.
-#
 name: Tests
 on:
   pull_request:
     paths-ignore:
       - 'README.md'
-  push:
-    paths-ignore:
-      - 'README.md'
-  # For systems with an upstream API that could drift unexpectedly (like most SaaS systems, etc.),
-  # we recommend testing at a regular interval not necessarily tied to code changes. This will 
-  # ensure you are alerted to something breaking due to an API change, even if the code did not
-  # change.
-  # schedule:
-  #   - cron: '0 13 * * *'
 jobs:
   # ensure the code builds...
   build:
@@ -26,7 +14,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.15'
+        go-version: '1.17'
       id: go
 
     - name: Check out code into the Go module directory
@@ -45,21 +33,21 @@ jobs:
     name: Matrix Test
     needs: build
     runs-on: ubuntu-latest
+    environment: "acceptance tests"
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         # list whatever Terraform versions here you would like to support
         terraform:
-          - '0.12.29'
-          - '0.13.4'
-          - '0.14.0-beta2'
+          - '1.2.2'
+          - '1.2.3'
     steps:
 
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.15'
+        go-version: '1.17'
       id: go
 
     - name: Check out code into the Go module directory
@@ -68,7 +56,13 @@ jobs:
     - name: Get dependencies
       run: |
         go mod download
-        
+
+    - name: Boot services for acceptance tests
+      run: docker-compose -f scripts/docker-compose.yaml up -d
+      env:
+        AIDBOX_LICENSE_ID: ${{ secrets.AIDBOX_LICENSE_ID }}
+        AIDBOX_LICENSE_KEY: ${{ secrets.AIDBOX_LICENSE_KEY }}
+        MB_LICENSE: ${{ secrets.MB_LICENSE }}
     - name: TF acceptance tests
       timeout-minutes: 10
       env:
