@@ -8,7 +8,7 @@ import (
 func TestAccResourceClient_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testProviderFactories,
+		ProviderFactories: testMultiboxProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceClient_basic,
@@ -23,7 +23,13 @@ func TestAccResourceClient_basic(t *testing.T) {
 }
 
 const testAccResourceClient_basic = `
+resource "aidbox_box" "yourbox" {
+  name         = "yourbox"
+  fhir_version = "fhir-4.0.1" 
+  description  = "A box instance within multibox, a multi-tenant aidbox server"
+}
 resource "aidbox_client" "example" {
+  box_id      = aidbox_box.yourbox.name
   name        = "my-client"
   secret      = "secret"
   grant_types = ["basic"]

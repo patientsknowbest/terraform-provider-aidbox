@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/patientsknowbest/terraform-provider-aidbox/internal/aidbox"
 )
 
@@ -34,7 +35,8 @@ func resourceSchemaClient() map[string]*schema.Schema {
 			Description: "Grant type used for authentication (basic)",
 			Type:        schema.TypeList,
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{"basic"}, false),
 			},
 			Required: true,
 			MinItems: 1,
