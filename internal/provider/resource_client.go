@@ -2,9 +2,9 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/patientsknowbest/terraform-provider-aidbox/internal/aidbox"
 )
 
@@ -35,8 +35,7 @@ func resourceSchemaClient() map[string]*schema.Schema {
 			Description: "Grant type used for authentication (basic)",
 			Type:        schema.TypeList,
 			Elem: &schema.Schema{
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"basic"}, false),
+				Type: schema.TypeString,
 			},
 			Required: true,
 			MinItems: 1,
@@ -48,20 +47,36 @@ func mapClientToData(res *aidbox.Client, data *schema.ResourceData) {
 	data.SetId(res.ID)
 	data.Set("name", res.ID)
 	data.Set("secret", res.Secret)
-	data.Set("grant_types", res.GrantTypes)
+	var types []interface{}
+	for _, gt := range res.GrantTypes {
+		types = append(types, gt.ToString())
+	}
+	data.Set("grant_types", types)
 }
 
-func mapClientFromData(d *schema.ResourceData) *aidbox.Client {
+func mapClientFromData(d *schema.ResourceData) (*aidbox.Client, error) {
 	res := &aidbox.Client{}
 	res.ID = d.Get("name").(string)
 	res.Secret = d.Get("secret").(string)
-	res.GrantTypes = d.Get("grant_types").([]interface{})
-	return res
+	types := d.Get("grant_types").([]interface{})
+	grantTypes := []aidbox.GrantType{}
+	for _, t := range types {
+		gt, err := aidbox.ParseGrantType(fmt.Sprint(t))
+		if err != nil {
+			return nil, err
+		}
+		grantTypes = append(grantTypes, gt)
+	}
+	res.GrantTypes = grantTypes
+	return res, nil
 }
 
 func resourceClientCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	q := mapClientFromData(d)
+	q, err := mapClientFromData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	res, err := apiClient.CreateClient(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
@@ -85,7 +100,10 @@ func resourceClientRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 func resourceClientUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	q := mapClientFromData(d)
+	q, err := mapClientFromData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	ac, err := apiClient.UpdateClient(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
