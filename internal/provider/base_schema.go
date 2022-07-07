@@ -16,6 +16,7 @@ func baseBoxResourceSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Default:     "",
 			Optional:    true,
+			ForceNew:    true, // Changing the box_id always forces replacement
 		},
 		//"meta": {
 		//	Description: "Metadata for the resource",
