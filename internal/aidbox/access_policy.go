@@ -12,11 +12,16 @@ type AccessPolicy struct {
 	Description string             `json:"description,omitempty"`
 	Engine      AccessPolicyEngine `json:"engine"`
 	Schema      json.RawMessage    `json:"schema,omitempty"`
-	Link        string             `json:"link,omitempty"`
+	Link        []Reference        `json:"link,omitempty"`
 }
 
 func (*AccessPolicy) GetResourceName() string {
 	return "AccessPolicy"
+}
+
+type Reference struct {
+	ResourceId   string `json:"id"`
+	ResourceType string `json:"resourceType"`
 }
 
 type AccessPolicyEngine int

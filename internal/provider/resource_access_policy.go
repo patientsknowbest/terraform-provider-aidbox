@@ -24,9 +24,15 @@ func mapAccessPolicyToData(res *aidbox.AccessPolicy, data *schema.ResourceData) 
 	data.SetId(res.ID)
 	data.Set("description", res.Description)
 	data.Set("engine", res.Engine.ToString())
-	if res.Link != "" {
-		data.Set("link", res.Link)
+	var linkData []interface{}
+	for _, ref := range res.Link {
+		data := map[string]interface{}{
+			"resource_id":   ref.ResourceId,
+			"resource_type": ref.ResourceType,
+		}
+		linkData = append(linkData, data)
 	}
+	data.Set("link", linkData)
 	if string(res.Schema) != "" {
 		data.Set("schema", string(res.Schema))
 	}
@@ -41,8 +47,17 @@ func mapAccessPolicyFromData(d *schema.ResourceData) *aidbox.AccessPolicy {
 		log.Panicln(err)
 	}
 	res.Engine = e
-	if vv, ok := d.GetOk("link"); ok {
-		res.Link = vv.(string)
+	if v, ok := d.GetOk("link"); ok {
+		references := []aidbox.Reference{}
+		for _, data := range v.([]interface{}) {
+			linkData := data.(map[string]interface{})
+			ref := aidbox.Reference{
+				ResourceId:   linkData["resource_id"].(string),
+				ResourceType: linkData["resource_type"].(string),
+			}
+			references = append(references, ref)
+		}
+		res.Link = references
 	}
 	if vv, ok := d.GetOk("schema"); ok {
 		res.Schema = json.RawMessage(vv.(string))
@@ -113,8 +128,22 @@ func resourceSchemaAccessPolicy() map[string]*schema.Schema {
 		},
 		"link": {
 			Description: "The actor to allow access. Used only if engine is allow.",
-			Type:        schema.TypeString,
+			Type:        schema.TypeList,
 			Optional:    true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"resource_id": {
+						Description: "The ID of the referenced resource",
+						Type:        schema.TypeString,
+						Required:    true,
+					},
+					"resource_type": {
+						Description: "The type of the referenced resource (Client)",
+						Type:        schema.TypeString,
+						Required:    true,
+					},
+				},
+			},
 		},
 	}
 }

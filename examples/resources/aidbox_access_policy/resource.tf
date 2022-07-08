@@ -1,11 +1,12 @@
-resource "aidbox_access_policy" "example" {
+resource "aidbox_access_policy" "example_schema" {
   description = "A policy to allow postman to access data"
   engine      = "json-schema"
   schema = jsonencode({
     "required" = [
       "client",
       "uri",
-    "request-method"]
+      "request-method"
+    ]
     "properties" = {
       "uri" = {
         "type"    = "string"
@@ -24,4 +25,13 @@ resource "aidbox_access_policy" "example" {
       }
     }
   })
+}
+
+resource "aidbox_access_policy" "example_allow" {
+  description = "A policy to allow access to client with basic auth"
+  engine      = "allow"
+  link {
+    resource_id   = "client-id"
+    resource_type = "Client"
+  }
 }
