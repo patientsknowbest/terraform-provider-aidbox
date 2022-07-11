@@ -76,7 +76,7 @@ resource "aidbox_client" "client" {
   grant_types = ["basic"]
 }
 resource "aidbox_access_policy" "mypolicy" {
-  description = "A policy to allow access to client with basic auth"
+  description = "A policy to allow client to access data"
   engine      = "allow"
   link {
     resource_id   = aidbox_client.client.name

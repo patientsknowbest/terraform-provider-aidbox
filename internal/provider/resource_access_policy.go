@@ -26,7 +26,7 @@ func mapAccessPolicyToData(res *aidbox.AccessPolicy, data *schema.ResourceData) 
 	data.Set("engine", res.Engine.ToString())
 	var linkData []interface{}
 	for _, ref := range res.Link {
-		data := map[string]interface{}{
+		data := map[string]string{
 			"resource_id":   ref.ResourceId,
 			"resource_type": ref.ResourceType,
 		}

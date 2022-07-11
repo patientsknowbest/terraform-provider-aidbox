@@ -28,7 +28,7 @@ resource "aidbox_access_policy" "example_schema" {
 }
 
 resource "aidbox_access_policy" "example_allow" {
-  description = "A policy to allow access to client with basic auth"
+  description = "A policy to allow client to access data"
   engine      = "allow"
   link {
     resource_id   = "client-id"
