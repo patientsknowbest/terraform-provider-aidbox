@@ -28,16 +28,16 @@ func envOrDefault(env string, df string) string {
 }
 
 func init() {
-	client := aidbox.NewClient(envOrDefault("AIDBOX_URL", "http://localhost:8888"), envOrDefault("AIDBOX_CLIENT", "root"), envOrDefault("AIDBOX_CLIENT_SECRET", "secret"), false)
-	testProvider = New(client)()
+	apiClient := aidbox.NewApiClient(envOrDefault("AIDBOX_URL", "http://localhost:8888"), envOrDefault("AIDBOX_CLIENT", "root"), envOrDefault("AIDBOX_CLIENT_SECRET", "secret"), false)
+	testProvider = New(apiClient)()
 	testProviderFactories = map[string]func() (*schema.Provider, error){
 		"aidbox": func() (*schema.Provider, error) {
 			return testProvider, nil
 		},
 	}
 
-	client2 := aidbox.NewClient(envOrDefault("MULTIBOX_URL", "http://localhost:8889"), envOrDefault("AIDBOX_CLIENT", "root"), envOrDefault("AIDBOX_CLIENT_SECRET", "secret"), true)
-	testMultiboxProvider = New(client2)()
+	apiClient2 := aidbox.NewApiClient(envOrDefault("MULTIBOX_URL", "http://localhost:8889"), envOrDefault("AIDBOX_CLIENT", "root"), envOrDefault("AIDBOX_CLIENT_SECRET", "secret"), true)
+	testMultiboxProvider = New(apiClient2)()
 	testMultiboxProviderFactories = map[string]func() (*schema.Provider, error){
 		"aidbox": func() (*schema.Provider, error) {
 			return testMultiboxProvider, nil

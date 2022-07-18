@@ -24,9 +24,15 @@ func mapAccessPolicyToData(res *aidbox.AccessPolicy, data *schema.ResourceData) 
 	data.SetId(res.ID)
 	data.Set("description", res.Description)
 	data.Set("engine", res.Engine.ToString())
-	if res.Link != "" {
-		data.Set("link", res.Link)
+	var linkData []interface{}
+	for _, ref := range res.Link {
+		data := map[string]string{
+			"resource_id":   ref.ResourceId,
+			"resource_type": ref.ResourceType,
+		}
+		linkData = append(linkData, data)
 	}
+	data.Set("link", linkData)
 	if string(res.Schema) != "" {
 		data.Set("schema", string(res.Schema))
 	}
@@ -41,8 +47,17 @@ func mapAccessPolicyFromData(d *schema.ResourceData) *aidbox.AccessPolicy {
 		log.Panicln(err)
 	}
 	res.Engine = e
-	if vv, ok := d.GetOk("link"); ok {
-		res.Link = vv.(string)
+	if v, ok := d.GetOk("link"); ok {
+		references := []aidbox.Reference{}
+		for _, data := range v.([]interface{}) {
+			linkData := data.(map[string]interface{})
+			ref := aidbox.Reference{
+				ResourceId:   linkData["resource_id"].(string),
+				ResourceType: linkData["resource_type"].(string),
+			}
+			references = append(references, ref)
+		}
+		res.Link = references
 	}
 	if vv, ok := d.GetOk("schema"); ok {
 		res.Schema = json.RawMessage(vv.(string))
@@ -51,9 +66,9 @@ func mapAccessPolicyFromData(d *schema.ResourceData) *aidbox.AccessPolicy {
 }
 
 func resourceAccessPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
+	apiClient := meta.(*aidbox.ApiClient)
 	q := mapAccessPolicyFromData(d)
-	res, err := client.CreateAccessPolicy(ctx, q, boxIdFromData(d))
+	res, err := apiClient.CreateAccessPolicy(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -62,8 +77,8 @@ func resourceAccessPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceAccessPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
-	res, err := client.GetAccessPolicy(ctx, d.Id(), boxIdFromData(d))
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetAccessPolicy(ctx, d.Id(), boxIdFromData(d))
 	if err != nil {
 		if handleNotFoundError(err, d) {
 			return nil
@@ -75,9 +90,9 @@ func resourceAccessPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceAccessPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
+	apiClient := meta.(*aidbox.ApiClient)
 	q := mapAccessPolicyFromData(d)
-	ti, err := client.UpdateAccessPolicy(ctx, q, boxIdFromData(d))
+	ti, err := apiClient.UpdateAccessPolicy(ctx, q, boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,8 +101,8 @@ func resourceAccessPolicyUpdate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceAccessPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*aidbox.Client)
-	err := client.DeleteAccessPolicy(ctx, d.Id(), boxIdFromData(d))
+	apiClient := meta.(*aidbox.ApiClient)
+	err := apiClient.DeleteAccessPolicy(ctx, d.Id(), boxIdFromData(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,8 +128,22 @@ func resourceSchemaAccessPolicy() map[string]*schema.Schema {
 		},
 		"link": {
 			Description: "The actor to allow access. Used only if engine is allow.",
-			Type:        schema.TypeString,
+			Type:        schema.TypeList,
 			Optional:    true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"resource_id": {
+						Description: "The ID of the referenced resource",
+						Type:        schema.TypeString,
+						Required:    true,
+					},
+					"resource_type": {
+						Description: "The type of the referenced resource (Client)",
+						Type:        schema.TypeString,
+						Required:    true,
+					},
+				},
+			},
 		},
 	}
 }

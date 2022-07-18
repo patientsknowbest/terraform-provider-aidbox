@@ -21,6 +21,21 @@ func TestAccResourceAccessPolicy_schema(t *testing.T) {
 	})
 }
 
+func TestAccResourceAccessPolicy_allow(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAccessPolicy_allow,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_access_policy.mypolicy", "engine", "allow"),
+				),
+			},
+		},
+	})
+}
+
 const testAccResourceAccessPolicy_schema = `
 resource "aidbox_access_policy" "example" {
   description = "A policy to allow postman to access data"
@@ -51,5 +66,21 @@ resource "aidbox_access_policy" "example" {
   #    }
   #  }
   #})
+}
+`
+
+const testAccResourceAccessPolicy_allow = `
+resource "aidbox_client" "client" {
+  name        = "client-id"
+  secret      = "secret"
+  grant_types = ["basic"]
+}
+resource "aidbox_access_policy" "mypolicy" {
+  description = "A policy to allow client to access data"
+  engine      = "allow"
+  link {
+    resource_id   = aidbox_client.client.name
+    resource_type = "Client"
+  }
 }
 `

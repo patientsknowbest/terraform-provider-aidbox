@@ -12,11 +12,16 @@ type AccessPolicy struct {
 	Description string             `json:"description,omitempty"`
 	Engine      AccessPolicyEngine `json:"engine"`
 	Schema      json.RawMessage    `json:"schema,omitempty"`
-	Link        string             `json:"link,omitempty"`
+	Link        []Reference        `json:"link,omitempty"`
 }
 
 func (*AccessPolicy) GetResourceName() string {
 	return "AccessPolicy"
+}
+
+type Reference struct {
+	ResourceId   string `json:"id"`
+	ResourceType string `json:"resourceType"`
 }
 
 type AccessPolicyEngine int
@@ -90,30 +95,30 @@ func (g *AccessPolicyEngine) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (client *Client) CreateAccessPolicy(ctx context.Context, accessPolicy *AccessPolicy, boxId string) (*AccessPolicy, error) {
-	ap, err := client.createResource(ctx, accessPolicy, boxId)
+func (apiClient *ApiClient) CreateAccessPolicy(ctx context.Context, accessPolicy *AccessPolicy, boxId string) (*AccessPolicy, error) {
+	ap, err := apiClient.createResource(ctx, accessPolicy, boxId)
 	if err != nil {
 		return nil, err
 	}
 	return ap.(*AccessPolicy), nil
 }
 
-func (client *Client) GetAccessPolicy(ctx context.Context, id, boxId string) (*AccessPolicy, error) {
-	rr, err := client.getResource(ctx, "/AccessPolicy/"+id, boxId)
+func (apiClient *ApiClient) GetAccessPolicy(ctx context.Context, id, boxId string) (*AccessPolicy, error) {
+	rr, err := apiClient.getResource(ctx, "/AccessPolicy/"+id, boxId)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*AccessPolicy), nil
 }
 
-func (client *Client) UpdateAccessPolicy(ctx context.Context, q *AccessPolicy, boxId string) (*AccessPolicy, error) {
-	rr, err := client.updateResource(ctx, q, boxId)
+func (apiClient *ApiClient) UpdateAccessPolicy(ctx context.Context, q *AccessPolicy, boxId string) (*AccessPolicy, error) {
+	rr, err := apiClient.updateResource(ctx, q, boxId)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*AccessPolicy), nil
 }
 
-func (client *Client) DeleteAccessPolicy(ctx context.Context, id, boxId string) error {
-	return client.deleteResource(ctx, "/AccessPolicy/"+id, boxId)
+func (apiClient *ApiClient) DeleteAccessPolicy(ctx context.Context, id, boxId string) error {
+	return apiClient.deleteResource(ctx, "/AccessPolicy/"+id, boxId)
 }

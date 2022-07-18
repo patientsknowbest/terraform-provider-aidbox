@@ -23,7 +23,7 @@ func init() {
 	// }
 }
 
-func New(client *aidbox.Client) func() *schema.Provider {
+func New(apiClient *aidbox.ApiClient) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			Schema: map[string]*schema.Schema{
@@ -58,12 +58,13 @@ func New(client *aidbox.Client) func() *schema.Provider {
 				"aidbox_token_introspector": resourceTokenIntrospector(),
 				"aidbox_access_policy":      resourceAccessPolicy(),
 				"aidbox_box":                resourceBox(),
+				"aidbox_client":             resourceClient(),
 			},
 		}
 
 		p.ConfigureContextFunc = func(cx context.Context, rd *schema.ResourceData) (interface{}, diag.Diagnostics) {
-			if client != nil {
-				return client, nil
+			if apiClient != nil {
+				return apiClient, nil
 			}
 			var clientId, clientSecret, url string
 			urlI, ok := rd.GetOk("url")
@@ -92,7 +93,7 @@ func New(client *aidbox.Client) func() *schema.Provider {
 			}
 			isMultiboxI, ok := rd.GetOk("is_multibox")
 			isMultibox := ok && isMultiboxI.(bool)
-			return aidbox.NewClient(url, clientId, clientSecret, isMultibox), nil
+			return aidbox.NewApiClient(url, clientId, clientSecret, isMultibox), nil
 		}
 
 		return p

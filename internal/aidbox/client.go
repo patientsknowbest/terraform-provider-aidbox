@@ -4,262 +4,119 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"net/url"
 )
 
 type Client struct {
-	URL      string
-	Username string
-	Password string
-
-	// Username and Password are expected to be the superuser credentials if IsMultibox=true
-	IsMultibox bool
+	ResourceBase
+	Secret     string      `json:"secret"`
+	GrantTypes []GrantType `json:"grant_types"`
 }
 
-type AidboxError string
-
-const NotFoundError AidboxError = "Not found"
-
-func (t AidboxError) Error() string {
-	return string(t)
+func (*Client) GetResourceName() string {
+	return "Client"
 }
 
-func NewClient(URL, username, password string, isMultibox bool) *Client {
-	return &Client{
-		URL:        URL,
-		Username:   username,
-		Password:   password,
-		IsMultibox: isMultibox,
+type GrantType int
+
+const (
+	GrantTypeBasic GrantType = iota
+	//GrantTypeAuthorizationCode
+	//GrantTypeCode
+	//GrantTypePassword
+	//GrantTypeClientCredentials
+	//GrantTypeImplicit
+	//GrantTypeRefreshToken
+)
+
+func (g GrantType) ToString() string {
+	switch g {
+	case GrantTypeBasic:
+		return "basic"
+		//case GrantTypeAuthorizationCode:
+		//	return "authorization_code"
+		//case GrantTypeCode:
+		//	return "code"
+		//case GrantTypePassword:
+		//	return "password"
+		//case GrantTypeClientCredentials:
+		//	return "client_credentials"
+		//case GrantTypeImplicit:
+		//	return "implicit"
+		//case GrantTypeRefreshToken:
+		//	return "refresh_token"
 	}
+	log.Panicf("Unexpected GrantType %d\n", g)
+	return ""
 }
 
-func isAlright(statusCode int) bool {
-	return statusCode >= http.StatusOK && statusCode < http.StatusBadRequest
-}
+const ErrInvalidGrantType AidboxError = "Unsupported grant type"
 
-/// Horrid double unmarshal business to do discriminators on incoming json objects.
-func parseResource(in []byte) (Resource, error) {
-	s := struct {
-		ResourceType string `json:"resourceType"`
-	}{}
-	err := json.Unmarshal(in, &s)
-	if err != nil {
-		return nil, err
-	}
-	var r Resource
-	switch s.ResourceType {
-	case "TokenIntrospector":
-		r = &TokenIntrospector{}
-	case "AccessPolicy":
-		r = &AccessPolicy{}
+func ParseGrantType(typeString string) (GrantType, error) {
+	switch typeString {
+	case "basic":
+		return GrantTypeBasic, nil
+	//case "authorization_code":
+	//	return GrantTypeAuthorizationCode, nil
+	//case "code":
+	//	return GrantTypeCode, nil
+	//case "password":
+	//	return GrantTypePassword, nil
+	//case "client_credentials":
+	//	return GrantTypeClientCredentials, nil
+	//case "implicit":
+	//	return GrantTypeImplicit, nil
+	//case "refresh_token":
+	//	return GrantTypeRefreshToken, nil
 	default:
-		return nil, fmt.Errorf("Unsupported resource type %s", s.ResourceType)
+		return 0, ErrInvalidGrantType
 	}
-	err = json.Unmarshal(in, &r)
-	return r, err
 }
 
-func (client *Client) createResource(ctx context.Context, resource Resource, boxId string) (Resource, error) {
-	buf := bytes.Buffer{}
-	err := json.NewEncoder(&buf).Encode(resource)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, client.URL+"/"+resource.GetResourceName(), &buf)
-	if err != nil {
-		return nil, err
-	}
-
-	err = client.addAuthAndHost(ctx, req, boxId)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("unexpected status code received %d %s", res.StatusCode, res.Status)
-	}
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return parseResource(b)
+func (g GrantType) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString(`"`)
+	buffer.WriteString(g.ToString())
+	buffer.WriteString(`"`)
+	return buffer.Bytes(), nil
 }
 
-func (client *Client) getResource(ctx context.Context, relativePath, boxId string) (Resource, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, client.URL+relativePath, nil)
-	if err != nil {
-		return nil, err
+func (g *GrantType) UnmarshalJSON(b []byte) error {
+	var j string
+	if err := json.Unmarshal(b, &j); err != nil {
+		return err
 	}
-	err = client.addAuthAndHost(ctx, req, boxId)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Accept", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode == http.StatusNotFound {
-		return nil, NotFoundError
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
-	}
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return parseResource(b)
-}
-
-func (client *Client) updateResource(ctx context.Context, resource Resource, boxId string) (Resource, error) {
-	buf := bytes.Buffer{}
-	err := json.NewEncoder(&buf).Encode(resource)
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("[TRACE] sending [[ %s ]]", buf.String())
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, client.URL+"/"+resource.GetResourceName()+"/"+resource.GetID(), &buf)
-	if err != nil {
-		return nil, err
-	}
-	err = client.addAuthAndHost(ctx, req, boxId)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if !isAlright(res.StatusCode) {
-		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
-	}
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return parseResource(b)
-}
-
-func (client *Client) deleteResource(ctx context.Context, relativePath, boxId string) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, client.URL+relativePath, nil)
+	tt, err := ParseGrantType(j)
 	if err != nil {
 		return err
 	}
-	err = client.addAuthAndHost(ctx, req, boxId)
-	if err != nil {
-		return err
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	if !isAlright(res.StatusCode) {
-		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
-	}
+	*g = tt
 	return nil
 }
 
-/// Some resources (multibox box management API for instance) are accessible only through the RPC endpoint
-/// https://docs.aidbox.app/api-1/rpc-api
-func (client *Client) rpcRequest(ctx context.Context, method string, request interface{}, responseT interface{}, boxId string) error {
-	rm, err := json.Marshal(request)
-	if err != nil {
-		return err
-	}
-	wrapper := struct {
-		Method string          `json:"method"`
-		Params json.RawMessage `json:"params"`
-	}{
-		Method: method,
-		Params: rm,
-	}
-	tflog.Trace(ctx, "rpcRequest", map[string]interface{}{
-		"wrapper": wrapper,
-	})
-	wr, err := json.Marshal(wrapper)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequestWithContext(ctx, "POST", client.URL+"/rpc", bytes.NewBuffer(wr))
-	if err != nil {
-		return err
-	}
-	err = client.addAuthAndHost(ctx, req, boxId)
-	if err != nil {
-		return err
-	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	if !isAlright(resp.StatusCode) {
-		return fmt.Errorf("unexpected status code from RPC request %d %v", resp.StatusCode, resp.Status)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	var response struct {
-		Result json.RawMessage `json:"result,omitempty"`
-		Error  json.RawMessage `json:"error,omitempty"`
-	}
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		return err
-	}
-	if response.Error != nil {
-		return fmt.Errorf("error response from RPC call %v", string(response.Error))
-	}
-	return json.Unmarshal(response.Result, responseT)
-}
-
-/// Adds appropriate Authorization/Cookie & Host header to a request.
-/// For multibox, we're expected to get the access-token from multibox API and use that.
-/// and multibox will route our request to the appropriate box based on
-func (client *Client) addAuthAndHost(ctx context.Context, req *http.Request, boxId string) error {
-	if boxId == "" {
-		req.SetBasicAuth(client.Username, client.Password)
-	} else {
-		box, err := client.getBox(ctx, boxId)
-		if err != nil {
-			return err
-		}
-		boxURL, err := url.Parse(box.BoxURL)
-		if err != nil {
-			return err
-		}
-		tflog.Info(ctx, "addAuthAndHost", map[string]interface{}{
-			"hostname":     boxURL.Hostname(),
-			"access_token": box.AccessToken,
-		})
-		req.Host = boxURL.Hostname()
-		req.Header.Set("Cookie", fmt.Sprintf("aidbox-auth-token=%s", box.AccessToken))
-	}
-	return nil
-}
-
-func (client *Client) getBox(ctx context.Context, boxId string) (*Box, error) {
-	if !client.IsMultibox {
-		return nil, fmt.Errorf("boxId provided to non-multibox client")
-	}
-	box := Box{}
-	err := client.rpcRequest(ctx, "multibox/get-box", struct {
-		Id string `json:"id"`
-	}{boxId}, &box, "")
+func (apiClient *ApiClient) CreateClient(ctx context.Context, client *Client, boxId string) (*Client, error) {
+	c, err := apiClient.createResource(ctx, client, boxId)
 	if err != nil {
 		return nil, err
 	}
-	return &box, nil
+	return c.(*Client), nil
+}
+
+func (apiClient *ApiClient) GetClient(ctx context.Context, id, boxId string) (*Client, error) {
+	rr, err := apiClient.getResource(ctx, "/Client/"+id, boxId)
+	if err != nil {
+		return nil, err
+	}
+	return rr.(*Client), nil
+}
+
+func (apiClient *ApiClient) UpdateClient(ctx context.Context, q *Client, boxId string) (*Client, error) {
+	rr, err := apiClient.updateResource(ctx, q, boxId)
+	if err != nil {
+		return nil, err
+	}
+	return rr.(*Client), nil
+}
+
+func (apiClient *ApiClient) DeleteClient(ctx context.Context, id, boxId string) error {
+	return apiClient.deleteResource(ctx, "/Client/"+id, boxId)
 }

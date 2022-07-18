@@ -18,30 +18,30 @@ func (*Box) GetResourceName() string {
 	return "Box"
 }
 
-func (client *Client) CreateBox(ctx context.Context, box *Box) (*Box, error) {
+func (apiClient *ApiClient) CreateBox(ctx context.Context, box *Box) (*Box, error) {
 	resultBox := &Box{}
-	err := client.rpcRequest(ctx, "multibox/create-box", box, resultBox, "")
+	err := apiClient.rpcRequest(ctx, "multibox/create-box", box, resultBox, "")
 	if err != nil {
 		return nil, err
 	}
 	// Not all the data are returned from the create-box operation, so call GetBot again to get the full thing
-	resultBox, err = client.GetBox(ctx, resultBox.ID)
+	resultBox, err = apiClient.GetBox(ctx, resultBox.ID)
 	if err != nil {
 		return nil, err
 	}
 	return resultBox, err
 }
 
-func (client *Client) GetBox(ctx context.Context, id string) (*Box, error) {
+func (apiClient *ApiClient) GetBox(ctx context.Context, id string) (*Box, error) {
 	resultBox := Box{}
-	err := client.rpcRequest(ctx, "multibox/get-box", &struct {
+	err := apiClient.rpcRequest(ctx, "multibox/get-box", &struct {
 		Id string `json:"id"`
 	}{id}, &resultBox, "")
 	return &resultBox, err
 }
 
-func (client *Client) DeleteBox(ctx context.Context, id string) error {
-	return client.rpcRequest(ctx, "multibox/delete-box", &struct {
+func (apiClient *ApiClient) DeleteBox(ctx context.Context, id string) error {
+	return apiClient.rpcRequest(ctx, "multibox/delete-box", &struct {
 		Id string `json:"id"`
 	}{id}, &Box{}, "")
 }
