@@ -210,7 +210,14 @@ func (apiClient *ApiClient) rpcRequest(ctx context.Context, method string, reque
 		return err
 	}
 	if !isAlright(resp.StatusCode) {
-		return fmt.Errorf("unexpected status code from RPC request %d %v", resp.StatusCode, resp.Status)
+		msg, err := ioutil.ReadAll(resp.Body)
+		var msgStr string
+		if err != nil {
+			msgStr = err.Error()
+		} else {
+			msgStr = string(msg)
+		}
+		return fmt.Errorf("unexpected status code from RPC request %d %v [%s]", resp.StatusCode, resp.Status, msgStr)
 	}
 	defer func() { _ = resp.Body.Close() }()
 	var response struct {
