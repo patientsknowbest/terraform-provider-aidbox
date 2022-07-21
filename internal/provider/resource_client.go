@@ -30,6 +30,7 @@ func resourceSchemaClient() map[string]*schema.Schema {
 			Description: "Client secret used for authentication",
 			Type:        schema.TypeString,
 			Required:    true,
+			Sensitive:   true,
 		},
 		"grant_types": {
 			Description: "Grant type used for authentication (basic)",
