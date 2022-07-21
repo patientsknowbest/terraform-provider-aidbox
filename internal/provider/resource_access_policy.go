@@ -128,6 +128,13 @@ func resourceSchemaAccessPolicy() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				// Need to handle empty strings explicitly
+				if old == "" && new != "" {
+					return false
+				}
+				if old != "" && new == "" {
+					return false
+				}
 				var oldM, newM map[string]interface{}
 				err := json.Unmarshal([]byte(old), &oldM)
 				if err != nil {
