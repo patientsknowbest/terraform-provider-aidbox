@@ -11,14 +11,13 @@ services:
       POSTGRES_DB:       "postgres"
 
   devbox:
-    # :edge, pinned on 2022-05-31
-    image: "healthsamurai/devbox@sha256:98e4909e8bb5fd2508bf3c9ed45be629523c381d3d84b3587f3a204f31e3fc2d"
+    # :latest, pinned on 2022-08-27
+    image: "healthsamurai/devbox@sha256:a010d77ce2fa31222ae334fabc529734d6fbf5aa09be8bc2c2f88f2fe8aa707b"
     ports:
       - "8888:8888"
     environment:
       PGHOST: "database-devbox"
-      AIDBOX_LICENSE_ID: "${AIDBOX_LICENSE_ID:?err}"
-      AIDBOX_LICENSE_KEY: "${AIDBOX_LICENSE_KEY:?err}"
+      AIDBOX_LICENSE: "${AIDBOX_LICENSE:?err}"
       AIDBOX_CLIENT_ID: "root"
       AIDBOX_CLIENT_SECRET: "secret"
       AIDBOX_ADMIN_ID: "admin"
@@ -42,7 +41,7 @@ services:
 
   multibox:
     # Version pinned 2022-06-18 tag healthsamurai/multibox:edge
-    image: "healthsamurai/multibox@sha256:7bf72b7665e07d3dcf1370bf16cd1e495d98441bc67f81cf46fdb4d30c84576e"
+    image: "healthsamurai/multibox@sha256:9492b7a6e92b04b3389c52116e68c7550699162f5550b454e1f3d11cb008627b"
     ports:
       - "8889:8889"
     environment:
