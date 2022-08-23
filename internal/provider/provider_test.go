@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/patientsknowbest/terraform-provider-aidbox/internal/aidbox"
+	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 	"os"
 	"testing"
 

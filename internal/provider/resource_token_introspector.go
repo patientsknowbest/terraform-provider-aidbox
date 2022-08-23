@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/patientsknowbest/terraform-provider-aidbox/internal/aidbox"
+	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 	"log"
 )
 
