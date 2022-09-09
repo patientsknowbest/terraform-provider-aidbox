@@ -42,7 +42,7 @@ func isAlright(statusCode int) bool {
 	return statusCode >= http.StatusOK && statusCode < http.StatusBadRequest
 }
 
-/// Horrid double unmarshal business to do discriminators on incoming json objects.
+// Horrid double unmarshal business to do discriminators on incoming json objects.
 func parseResource(in []byte) (Resource, error) {
 	s := struct {
 		ResourceType string `json:"resourceType"`
@@ -174,8 +174,67 @@ func (apiClient *ApiClient) deleteResource(ctx context.Context, relativePath, bo
 	return nil
 }
 
-/// Some resources (multibox box management API for instance) are accessible only through the RPC endpoint
-/// https://docs.aidbox.app/api-1/rpc-api
+func (apiClient *ApiClient) post(ctx context.Context, requestBody interface{}, relativePath, boxId string, responseT interface{}) error {
+	buf := bytes.Buffer{}
+	err := json.NewEncoder(&buf).Encode(requestBody)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiClient.URL+relativePath, &buf)
+	if err != nil {
+		return err
+	}
+
+	err = apiClient.addAuthAndHost(ctx, req, boxId)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if !isAlright(res.StatusCode) {
+		return fmt.Errorf("unexpected status code received %d %s", res.StatusCode, res.Status)
+	}
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, responseT)
+}
+
+func (apiClient *ApiClient) get(ctx context.Context, relativePath, boxId string, responseT interface{}) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiClient.URL+relativePath, nil)
+	if err != nil {
+		return err
+	}
+	err = apiClient.addAuthAndHost(ctx, req, boxId)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusNotFound {
+		return NotFoundError
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
+	}
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, responseT)
+}
+
+// Some resources (multibox box management API for instance) are accessible only through the RPC endpoint
+// https://docs.aidbox.app/api-1/rpc-api
 func (apiClient *ApiClient) rpcRequest(ctx context.Context, method string, request interface{}, responseT interface{}, boxId string) error {
 	rm, err := json.Marshal(request)
 	if err != nil {
@@ -234,9 +293,9 @@ func (apiClient *ApiClient) rpcRequest(ctx context.Context, method string, reque
 	return json.Unmarshal(response.Result, responseT)
 }
 
-/// Adds appropriate Authorization/Cookie & Host header to a request.
-/// For multibox, we're expected to get the access-token from multibox API and use that.
-/// and multibox will route our request to the appropriate box based on
+// Adds appropriate Authorization/Cookie & Host header to a request.
+// For multibox, we're expected to get the access-token from multibox API and use that.
+// and multibox will route our request to the appropriate box based on
 func (apiClient *ApiClient) addAuthAndHost(ctx context.Context, req *http.Request, boxId string) error {
 	if boxId == "" {
 		req.SetBasicAuth(apiClient.Username, apiClient.Password)

@@ -24,7 +24,7 @@ func (apiClient *ApiClient) CreateBox(ctx context.Context, box *Box) (*Box, erro
 	if err != nil {
 		return nil, err
 	}
-	// Not all the data are returned from the create-box operation, so call GetBot again to get the full thing
+	// Not all the data are returned from the create-box operation, so call GetBox again to get the full thing
 	resultBox, err = apiClient.GetBox(ctx, resultBox.ID)
 	if err != nil {
 		return nil, err
