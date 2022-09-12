@@ -60,8 +60,7 @@ jobs:
     - name: Boot services for acceptance tests
       run: docker-compose -f scripts/docker-compose.yaml up -d
       env:
-        AIDBOX_LICENSE_ID: ${{ secrets.AIDBOX_LICENSE_ID }}
-        AIDBOX_LICENSE_KEY: ${{ secrets.AIDBOX_LICENSE_KEY }}
+        AIDBOX_LICENSE: ${{ secrets.AIDBOX_LICENSE }}
         MB_LICENSE: ${{ secrets.MB_LICENSE }}
     - name: TF acceptance tests
       timeout-minutes: 10
