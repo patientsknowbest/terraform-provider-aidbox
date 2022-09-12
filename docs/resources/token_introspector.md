@@ -26,26 +26,26 @@ resource "aidbox_token_introspector" "example" {
 
 ### Required
 
-- **type** (String) Type of token introspector. One of (opaque|jwt)
+- `type` (String) Type of token introspector. One of (opaque|jwt)
 
 ### Optional
 
-- **box_id** (String) ID of box this object lives in
-- **introspection_endpoint** (Block List, Max: 1) Configuration for introspecting opaque access tokens. (see [below for nested schema](#nestedblock--introspection_endpoint))
-- **jwks_uri** (String) Location of JWKS public key information for validating JWT tokens
-- **jwt** (Block List, Max: 1) Configuration for validating jwt type access tokens (see [below for nested schema](#nestedblock--jwt))
+- `box_id` (String) ID of box this object lives in
+- `introspection_endpoint` (Block List, Max: 1) Configuration for introspecting opaque access tokens. (see [below for nested schema](#nestedblock--introspection_endpoint))
+- `jwks_uri` (String) Location of JWKS public key information for validating JWT tokens
+- `jwt` (Block List, Max: 1) Configuration for validating jwt type access tokens (see [below for nested schema](#nestedblock--jwt))
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--introspection_endpoint"></a>
 ### Nested Schema for `introspection_endpoint`
 
 Optional:
 
-- **authorization** (String) Authorization header value.
-- **url** (String) URL of the introspection endpoint.
+- `authorization` (String) Authorization header value.
+- `url` (String) URL of the introspection endpoint.
 
 
 <a id="nestedblock--jwt"></a>
@@ -53,10 +53,10 @@ Optional:
 
 Required:
 
-- **iss** (String) The issuer of the JWT
+- `iss` (String) The issuer of the JWT
 
 Optional:
 
-- **secret** (String) The secret used to sign the JWT
+- `secret` (String) The secret used to sign the JWT
 
 

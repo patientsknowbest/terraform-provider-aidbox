@@ -43,7 +43,7 @@ resource "aidbox_access_policy" "example_schema" {
 }
 
 resource "aidbox_access_policy" "example_allow" {
-  description = "A policy to allow access to client with basic auth"
+  description = "A policy to allow client to access data"
   engine      = "allow"
   link {
     resource_id   = "client-id"
@@ -57,18 +57,18 @@ resource "aidbox_access_policy" "example_allow" {
 
 ### Required
 
-- **engine** (String) The engine which is used to evaluate this policy. One of (json-schema|allow)
+- `engine` (String) The engine which is used to evaluate this policy. One of (json-schema|allow)
 
 ### Optional
 
-- **box_id** (String) ID of box this object lives in
-- **description** (String) Description of access policy for human users.
+- `box_id` (String) ID of box this object lives in
+- `description` (String) Description of access policy for human users.
 - `link` (Block List) The actor to allow access. Used only if engine is allow. (see [below for nested schema](#nestedblock--link))
-- **schema** (String) JSON-schema policy to be evaluated. Used only if engine is json-schema
+- `schema` (String) JSON-schema policy to be evaluated. Used only if engine is json-schema
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--link"></a>
 ### Nested Schema for `link`

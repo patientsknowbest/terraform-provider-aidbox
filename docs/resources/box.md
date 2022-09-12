@@ -29,16 +29,16 @@ resource "aidbox_box" "my_box" {
 
 ### Required
 
-- **fhir_version** (String) FHIR version. Value must be from the multibox/versions response.
-- **name** (String) name (required): id of the box to create. Must match /[a-z][a-z0-9]{4,}/
+- `fhir_version` (String) FHIR version. Value must be from the multibox/versions response.
+- `name` (String) name (required): id of the box to create. Must match /[a-z][a-z0-9]{4,}/
 
 ### Optional
 
-- **description** (String) Description of box for human users.
+- `description` (String) Description of box for human users.
 
 ### Read-Only
 
-- **box_url** (String) URL for accessing the box
-- **id** (String) The ID of this resource.
+- `box_url` (String) URL for accessing the box
+- `id` (String) The ID of this resource.
 
 

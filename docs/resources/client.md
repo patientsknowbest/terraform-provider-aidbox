@@ -27,7 +27,7 @@ resource "aidbox_client" "example" {
 
 - `grant_types` (List of String) Grant type used for authentication (basic)
 - `name` (String) Client ID used for authentication
-- `secret` (String) Client secret used for authentication
+- `secret` (String, Sensitive) Client secret used for authentication
 
 ### Optional
 

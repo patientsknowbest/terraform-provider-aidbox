@@ -26,7 +26,7 @@ provider "aidbox" {
 
 ### Optional
 
-- **client_id** (String) The client ID to access aidbox API
-- **client_secret** (String, Sensitive) The client secret to access aidbox API
-- **is_multibox** (Boolean) true if this is a multibox instance
-- **url** (String) The URL of aidbox API
+- `client_id` (String) The client ID to access aidbox API
+- `client_secret` (String, Sensitive) The client secret to access aidbox API
+- `is_multibox` (Boolean) true if this is a multibox instance
+- `url` (String) The URL of aidbox API
