@@ -145,7 +145,7 @@ func resourceSchemaAccessPolicy() map[string]*schema.Schema {
 					panic(err)
 				}
 				return reflect.DeepEqual(oldM, newM)
-			  },
+			},
 		},
 		"link": {
 			Description: "The actor to allow access. Used only if engine is allow.",
