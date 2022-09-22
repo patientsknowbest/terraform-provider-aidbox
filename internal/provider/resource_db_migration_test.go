@@ -2,16 +2,16 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"os/exec"
+	"regexp"
 	"testing"
 )
 
-// TODO remove .Skip calls from tests
-// - remove state from the db after test run
-// - ignore error thrown by post-script due to trying to delete resources
-// see https://pkbdev.atlassian.net/browse/PHR-11231
-
+// Having no real delete for the resource, CheckDestroy removes the migration
+// from the db after the test. In the multibox scenario the box itself is
+// deleted thus this is not required in that case.
 func TestAccResourceDbMigration(t *testing.T) {
-	t.Skip("This test is intended to be run only by hand. It's skipped because migrations can't be deleted and the post script for the test would fail, leaving unwanted state in the db.")
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
@@ -25,11 +25,44 @@ func TestAccResourceDbMigration(t *testing.T) {
 				),
 			},
 		},
+		CheckDestroy: func(state *terraform.State) error {
+			cmd := exec.Command("sh", "./remove_test_migrations.sh")
+			stdout, err := cmd.Output()
+			output := string(stdout)
+			if len(output) > 0 {
+				t.Log(string(stdout))
+			}
+			return err
+		},
+	})
+}
+
+func TestAccResourceDbUpdate(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceDbMigration,
+			},
+			{
+				Config:      testAccResourceDbMigrationUpdate,
+				ExpectError: regexp.MustCompile("Migrations cannot be updated. Add a new migration instead to achieve desired changes."),
+			},
+		},
+		CheckDestroy: func(state *terraform.State) error {
+			cmd := exec.Command("sh", "./remove_test_migrations.sh")
+			stdout, err := cmd.Output()
+			output := string(stdout)
+			if len(output) > 0 {
+				t.Log(string(stdout))
+			}
+			return err
+		},
 	})
 }
 
 func TestAccResourceDbMigration_multibox(t *testing.T) {
-	t.Skip("This test is intended to be run only by hand. It's skipped because migrations can't be deleted and the post script for the test would fail, leaving unwanted state in the db.")
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testMultiboxProviderFactories,
@@ -52,6 +85,15 @@ resource "aidbox_db_migration" "add_indexes" {
   sql = <<-EOT
 	CREATE INDEX appointment_resource_idx ON public.appointment USING gin (resource);
 	CREATE INDEX patient_resource_idx ON public.patient USING gin (resource);
+  EOT
+}
+`
+
+const testAccResourceDbMigrationUpdate = `
+resource "aidbox_db_migration" "add_indexes" {
+  name = "add_indexes"
+  sql = <<-EOT
+	# triggers an update which will fail
   EOT
 }
 `
