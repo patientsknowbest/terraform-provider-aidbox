@@ -11,7 +11,8 @@ import (
 func resourceDbMigration() *schema.Resource {
 	return &schema.Resource{
 		Description: "A database migration script to be run against the db. Migrations are permanent, once created" +
-			" you can't update/delete them. https://docs.aidbox.app/modules-1/aidbox-search/usdpsql#sql-migrations",
+			" you can't update them. You can delete the resource, but the migration will remain in the database.\n" +
+			"https://docs.aidbox.app/modules-1/aidbox-search/usdpsql#sql-migrations",
 		CreateContext: resourceDbMigrationCreate,
 		ReadContext:   resourceDbMigrationRead,
 		UpdateContext: resourceDbMigrationUpdate,

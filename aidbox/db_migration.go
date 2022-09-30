@@ -2,7 +2,6 @@ package aidbox
 
 import (
 	"context"
-	"errors"
 )
 
 // DbMigration
@@ -27,10 +26,9 @@ func (apiClient *ApiClient) CreateDbMigration(ctx context.Context, migration *Db
 		return nil, err
 	}
 
-	// Response might return other ongoing migrations, hence the search
-	createdMigration := findMigration(migration.Id, *response)
-	if createdMigration == nil {
-		return nil, errors.New("failed to create migration with id: " + migration.Id + ", response did not contain the requested migration id")
+	createdMigration, err := apiClient.GetDbMigration(ctx, migration.Id, boxId)
+	if err != nil {
+		return nil, err
 	}
 
 	return createdMigration, nil
