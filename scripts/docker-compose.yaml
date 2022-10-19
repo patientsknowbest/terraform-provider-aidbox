@@ -11,8 +11,8 @@ services:
       POSTGRES_DB:       "postgres"
 
   devbox:
-    # :latest, pinned on 2022-08-27
-    image: "healthsamurai/devbox@sha256:a010d77ce2fa31222ae334fabc529734d6fbf5aa09be8bc2c2f88f2fe8aa707b"
+    # :edge, pinned on 2022-10-19
+    image: "healthsamurai/devbox@sha256:4bab6ec177883886d6b10875737dc11083be123a6d16565c30a0324881477fa4"
     ports:
       - "8888:8888"
     environment:
@@ -40,8 +40,8 @@ services:
       POSTGRES_DB:       "postgres"
 
   multibox:
-    # Version pinned 2022-06-18 tag healthsamurai/multibox:edge
-    image: "healthsamurai/multibox@sha256:9492b7a6e92b04b3389c52116e68c7550699162f5550b454e1f3d11cb008627b"
+    # Version pinned 2022-10-18 tag healthsamurai/multibox:edge
+    image: "healthsamurai/multibox@sha256:a621c50812578434d0d3af29733da9687ac053699c3a770bfad9b81e993dcc87"
     ports:
       - "8889:8889"
     environment:
