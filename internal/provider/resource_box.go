@@ -2,6 +2,9 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
@@ -23,6 +26,11 @@ func mapBoxToData(res *aidbox.Box, data *schema.ResourceData) {
 	data.Set("fhir_version", res.FhirVersion)
 	data.Set("description", res.Description)
 	data.Set("box_url", res.BoxURL)
+	var env_vars []interface{}
+	for key, value := range res.Env {
+		env_vars = append(env_vars, fmt.Sprint(key+"="+value))
+	}
+	data.Set("env", env_vars)
 }
 
 func mapBoxFromData(d *schema.ResourceData) *aidbox.Box {
@@ -31,6 +39,14 @@ func mapBoxFromData(d *schema.ResourceData) *aidbox.Box {
 	res.Description = d.Get("description").(string)
 	res.FhirVersion = d.Get("fhir_version").(string)
 	res.BoxURL = d.Get("box_url").(string)
+	env := d.Get("env").([]interface{})
+	env_vars := map[string]string{}
+	for _, env_var := range env {
+		str := fmt.Sprintf("%v", env_var)
+		key_value := strings.Split(str, "=")
+		env_vars[key_value[0]] = key_value[1]
+	}
+	res.Env = env_vars
 	return res
 }
 
@@ -87,12 +103,15 @@ func resourceSchemaBox() map[string]*schema.Schema {
 			Required:    true,
 			ForceNew:    true,
 		},
-		// "env": {
-		// 	Description: "object with environment variables in lower-kebab-case (not in UPPER_SNAKE_CASE).",
-		// 	Type:        schema.TypeList,
-		// 	Optional:    true,
-		// 	ForceNew:    true,
-		// },
+		"env": {
+			Description: "object with environment variables in lower-kebab-case (not in UPPER_SNAKE_CASE).",
+			Type:        schema.TypeList,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			ForceNew: true,
+		},
 		"box_url": {
 			Description: "URL for accessing the box",
 			Type:        schema.TypeString,

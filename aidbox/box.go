@@ -8,10 +8,11 @@ import (
 
 type Box struct {
 	ResourceBase
-	Description string `json:"description"`
-	FhirVersion string `json:"fhirVersion"`
-	AccessToken string `json:"access-token,omitempty"`
-	BoxURL      string `json:"box-url,omitempty"`
+	Description string            `json:"description"`
+	FhirVersion string            `json:"fhirVersion"`
+	AccessToken string            `json:"access-token,omitempty"`
+	BoxURL      string            `json:"box-url,omitempty"`
+	Env         map[string]string `json:"env,omitempty"`
 }
 
 func (*Box) GetResourceName() string {
