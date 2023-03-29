@@ -59,6 +59,8 @@ func parseResource(in []byte) (Resource, error) {
 		r = &AccessPolicy{}
 	case "Client":
 		r = &Client{}
+	case "SearchParameter":
+		r = &SearchParameter{}
 	default:
 		return nil, fmt.Errorf("Unsupported resource type %s", s.ResourceType)
 	}
