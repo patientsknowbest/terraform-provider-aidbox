@@ -39,20 +39,25 @@ func resourceSchemaSearchParameter() map[string]*schema.Schema {
 			Required:    true,
 		},
 		"expression": {
-			Description: "Searchable elements expression",
-			Type:        schema.TypeList,
-			Required:    true,
-			MinItems:    1,
+			Description: "Expression for elements to search. " +
+				"Accepts three types: name of element / index / filter by pattern in collection. " +
+				"For filter, separator (|) must be used: {\"system\": \"phone\"} => \"system|phone\"",
+			Type:     schema.TypeList,
+			Required: true,
+			MinItems: 1,
 			Elem: &schema.Schema{
+				// PathArray in SearchParameter.expression is an array of strings, integers or objects
+				// but in TypeList, "the items are all of the same type defined by the Elem property"
 				Type: schema.TypeString,
 			},
 		},
 		"reference": {
 			Description: "Reference to resource this search param attached to",
-			Type:        schema.TypeList,
-			Required:    true,
-			MinItems:    1,
-			MaxItems:    1,
+			// not a TypeMap because "using the Elem block to define specific keys for the map is currently not possible"
+			Type:     schema.TypeList,
+			Required: true,
+			MinItems: 1,
+			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"resource_id": {
@@ -130,7 +135,9 @@ func mapSearchParameterToData(res *aidbox.SearchParameter, data *schema.Resource
 	for _, e := range res.ExpressionElements[0] {
 		stringElem, ok := e.(string)
 		if !ok {
-			// due to unmarshal in parseResource, the number becomes a float instead of int
+			// number is not an integer thanks to json.Unmarshal in parseResource: https://pkg.go.dev/encoding/json#Unmarshal
+			// "To unmarshal JSON into an interface value, Unmarshal stores one of these in the interface value:
+			// float64, for JSON numbers"
 			floatElem, ok := e.(float64)
 			if ok {
 				expression = append(expression, strconv.FormatFloat(floatElem, 'f', -1, 64))

@@ -32,7 +32,7 @@ resource "aidbox_search_parameter" "example_extension" {
 
 ### Required
 
-- `expression` (List of String) Searchable elements expression
+- `expression` (List of String) Expression for elements to search. Accepts three types: name of element / index / filter by pattern in collection. For filter, separator (|) must be used: {"system": "phone"} => "system|phone"
 - `name` (String) Name of search parameter, used in search query string
 - `reference` (Block List, Min: 1, Max: 1) Reference to resource this search param attached to (see [below for nested schema](#nestedblock--reference))
 - `type` (String) Type of search parameter
