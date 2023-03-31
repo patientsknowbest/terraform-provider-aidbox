@@ -35,6 +35,7 @@ resource "aidbox_box" "my_box" {
 ### Optional
 
 - `description` (String) Description of box for human users.
+- `env` (List of String) object with environment variables in lower-kebab-case (not in UPPER_SNAKE_CASE).
 
 ### Read-Only
 

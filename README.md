@@ -57,6 +57,6 @@ Trial license can be obtained either
 - we can also issue our own development licenses from now on, ask around for these
 
 ```sh
-$ (cd scripts && AIDBOX_LICENSE_ID=<your-devbox-license-id> AIDBOX_LICENSE_KEY=<your-devbox-license-key> MB_LICENSE=<your-multibox-license> docker-compose up -d)
+$ (cd scripts && AIDBOX_LICENSE=<your-devbox-license> MB_LICENSE=<your-multibox-license> docker-compose up -d)
 $ make testacc
 ```
