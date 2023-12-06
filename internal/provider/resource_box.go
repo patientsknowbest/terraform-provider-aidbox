@@ -39,7 +39,7 @@ func mapBoxFromData(d *schema.ResourceData) *aidbox.Box {
 	res.Description = d.Get("description").(string)
 	res.FhirVersion = d.Get("fhir_version").(string)
 	res.BoxURL = d.Get("box_url").(string)
-	env := d.Get("env").([]interface{})
+	env := d.Get("env").(*schema.Set).List()
 	env_vars := map[string]string{}
 	for _, env_var := range env {
 		str := fmt.Sprintf("%v", env_var)
@@ -105,7 +105,7 @@ func resourceSchemaBox() map[string]*schema.Schema {
 		},
 		"env": {
 			Description: "object with environment variables in lower-kebab-case (not in UPPER_SNAKE_CASE).",
-			Type:        schema.TypeList,
+			Type:        schema.TypeSet,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},

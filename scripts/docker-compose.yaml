@@ -40,8 +40,8 @@ services:
       POSTGRES_DB:       "postgres"
 
   multibox:
-    # healthsamurai/multibox:edge, pinned 2022-10-20
-    image: "healthsamurai/multibox@sha256:da8c348c00a7d2121521ed058e70b9fd366ffad1a016856f9e9e17eab1d7cc9c"
+    # healthsamurai/multibox:edge
+    image: "healthsamurai/multibox@sha256:3ecd5044b473712592d2460c0ae55409ccce343a800989bdc7de8fb62f434450"
     ports:
       - "8889:8889"
     environment:

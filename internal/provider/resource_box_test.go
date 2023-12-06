@@ -36,6 +36,7 @@ func TestAccResourceBoxWithEnvironmentVariablesSet(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_box.mybox", "box_url", "http://mybox.box.local:8889"),
 					resource.TestCheckTypeSetElemAttr("aidbox_box.mybox", "env.*", "foo-bar=bar"),
 					resource.TestCheckTypeSetElemAttr("aidbox_box.mybox", "env.*", "kaz-baz=kaz"),
+					resource.TestCheckTypeSetElemAttr("aidbox_box.mybox", "env.*", "aaa=123"),
 				),
 			},
 		},
@@ -72,7 +73,7 @@ resource "aidbox_box" "mybox" {
   name = "mybox"
   fhir_version  = "fhir-3.0.1" 
   description = "A box instance within multibox, a multi-tenant aidbox server"
-  env = ["foo-bar=bar","kaz-baz=kaz"]
+  env = ["foo-bar=bar","kaz-baz=kaz", "aaa=123"]
 }
 `
 
