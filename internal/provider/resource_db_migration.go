@@ -17,6 +17,9 @@ func resourceDbMigration() *schema.Resource {
 		ReadContext:   resourceDbMigrationRead,
 		UpdateContext: resourceDbMigrationUpdate,
 		DeleteContext: resourceDbMigrationDelete,
+		Importer:      &schema.ResourceImporter{
+			StateContext: resourceDbMigrationImport,
+		},
 		Schema:        resourceFullSchema(resourceSchemaDbMigration()),
 	}
 }
@@ -78,6 +81,16 @@ func resourceDbMigrationDelete(ctx context.Context, data *schema.ResourceData, m
 		"- if you want to undo the migration script you can do this by hand")
 	data.SetId("")
 	return nil
+}
+
+func resourceDbMigrationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetDbMigration(ctx, d.Id(), boxIdFromData(d))
+	if err != nil {
+		return nil, err
+	}
+	mapDbMigrationToData(res, d)
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceSchemaDbMigration() map[string]*schema.Schema {

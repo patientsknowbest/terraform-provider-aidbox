@@ -18,6 +18,9 @@ func resourceAccessPolicy() *schema.Resource {
 		ReadContext:   resourceAccessPolicyRead,
 		UpdateContext: resourceAccessPolicyUpdate,
 		DeleteContext: resourceAccessPolicyDelete,
+		Importer:      &schema.ResourceImporter{
+			StateContext: resourceAccessPolicyImport,
+		},
 		Schema:        resourceFullSchema(resourceSchemaAccessPolicy()),
 	}
 }
@@ -109,6 +112,16 @@ func resourceAccessPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceAccessPolicyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetAccessPolicy(ctx, d.Id(), boxIdFromData(d))
+	if err != nil {
+		return nil, err
+	}
+	mapAccessPolicyToData(res, d)
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceSchemaAccessPolicy() map[string]*schema.Schema {

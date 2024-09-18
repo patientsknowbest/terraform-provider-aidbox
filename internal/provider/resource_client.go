@@ -15,6 +15,9 @@ func resourceClient() *schema.Resource {
 		ReadContext:   resourceClientRead,
 		UpdateContext: resourceClientUpdate,
 		DeleteContext: resourceClientDelete,
+		Importer:      &schema.ResourceImporter{
+			StateContext: resourceClientImport,
+		},
 		Schema:        resourceFullSchema(resourceSchemaClient()),
 	}
 }
@@ -120,4 +123,14 @@ func resourceClientDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceClientImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetClient(ctx, d.Id(), boxIdFromData(d))
+	if err != nil {
+		return nil, err
+	}
+	mapClientToData(res, d)
+	return []*schema.ResourceData{d}, nil
 }

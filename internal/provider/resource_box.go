@@ -16,6 +16,9 @@ func resourceBox() *schema.Resource {
 		CreateContext: resourceBoxCreate,
 		ReadContext:   resourceBoxRead,
 		DeleteContext: resourceBoxDelete,
+		Importer:      &schema.ResourceImporter{
+			StateContext: resourceBoxImport,
+		},
 		Schema:        resourceSchemaBox(),
 	}
 }
@@ -81,6 +84,16 @@ func resourceBoxDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceBoxImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetBox(ctx, d.Id())
+	if err != nil {
+		return nil, err
+	}
+	mapBoxToData(res, d)
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceSchemaBox() map[string]*schema.Schema {
