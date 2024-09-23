@@ -17,6 +17,9 @@ func resourceSearchParameter() *schema.Resource {
 		ReadContext:   resourceSearchParameterRead,
 		UpdateContext: resourceSearchParameterUpdate,
 		DeleteContext: resourceSearchParameterDelete,
+		Importer:      &schema.ResourceImporter{
+			StateContext: resourceSearchParameterImport,
+		},
 		Schema:        resourceFullSchema(resourceSchemaSearchParameter()),
 	}
 }
@@ -211,4 +214,14 @@ func resourceSearchParameterDelete(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceSearchParameterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetSearchParameter(ctx, d.Id(), boxIdFromData(d))
+	if err != nil {
+		return nil, err
+	}
+	mapSearchParameterToData(res, d)
+	return []*schema.ResourceData{d}, nil
 }
