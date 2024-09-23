@@ -1,4 +1,4 @@
-# Visit https://goreleaser.com for documentation on how to customize this
+kip Visit https://goreleaser.com for documentation on how to customize this
 # behavior.
 version: 2
 before:
@@ -52,4 +52,4 @@ release:
   # If you want to manually examine the release before its live, uncomment this line:
   # draft: true
 changelog:
-  skip: true
+  disable: true
