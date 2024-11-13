@@ -8,13 +8,13 @@ import (
 func TestAccResourceClient_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testMultiboxProviderFactories,
+		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceClient_basic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("aidbox_client.example", "id", "my-client"),
-					resource.TestCheckResourceAttr("aidbox_client.example", "secret", "secret"),
+					resource.TestCheckResourceAttr("aidbox_client.example", "secret", "__sha256:2BB80D537B1DA3E38BD30361AA855686BDE0EACD7162FEF6A25FE97BF527A25B"),
 					resource.TestCheckResourceAttr("aidbox_client.example", "grant_types.0", "basic"),
 				),
 			},
@@ -23,15 +23,9 @@ func TestAccResourceClient_basic(t *testing.T) {
 }
 
 const testAccResourceClient_basic = `
-resource "aidbox_box" "yourbox" {
-  name         = "yourbox"
-  fhir_version = "fhir-4.0.1" 
-  description  = "A box instance within multibox, a multi-tenant aidbox server"
-}
 resource "aidbox_client" "example" {
-  box_id      = aidbox_box.yourbox.name
   name        = "my-client"
-  secret      = "secret"
+  secret      = "__sha256:2BB80D537B1DA3E38BD30361AA855686BDE0EACD7162FEF6A25FE97BF527A25B"
   grant_types = ["basic"]
 }
 `

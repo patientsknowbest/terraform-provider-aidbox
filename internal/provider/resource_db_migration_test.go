@@ -9,8 +9,7 @@ import (
 )
 
 // Having no real delete for the resource, CheckDestroy removes the migration
-// from the db after the test. In the multibox scenario the box itself is
-// deleted thus this is not required in that case.
+// from the db after the test.
 func TestAccResourceDbMigration_Create(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -98,23 +97,6 @@ func TestAccResourceDbMigration_UpdateAlwaysErrors(t *testing.T) {
 	})
 }
 
-func TestAccResourceDbMigration_MultiBox(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testMultiboxProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccResourceDbMigrationMultibox,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aidbox_db_migration.add_indexes_on_multibox", "id", "add_indexes_on_multibox"),
-					resource.TestCheckResourceAttr("aidbox_db_migration.add_indexes_on_multibox", "name", "add_indexes_on_multibox"),
-					resource.TestCheckResourceAttr("aidbox_db_migration.add_indexes_on_multibox", "sql", "CREATE INDEX patient_txid_idx ON patient(txid);\nCREATE INDEX person_txid_idx ON person(txid);\n"),
-				),
-			},
-		},
-	})
-}
-
 const testAccResourceDbMigration = `
 resource "aidbox_db_migration" "add_indexes" {
   name = "add_indexes"
@@ -151,22 +133,6 @@ resource "aidbox_db_migration" "add_indexes" {
   name = "add_indexes"
   sql = <<-EOT
 	# triggers an update which will fail
-  EOT
-}
-`
-
-const testAccResourceDbMigrationMultibox = `
-resource "aidbox_box" "mybox" {
-  name = "mybox"
-  fhir_version  = "fhir-3.0.1"
-  description = "A box instance within multibox, a multi-tenant aidbox server"
-}
-resource "aidbox_db_migration" "add_indexes_on_multibox" {
-  box_id = aidbox_box.mybox.name
-  name = "add_indexes_on_multibox"
-  sql = <<-EOT
-	CREATE INDEX patient_txid_idx ON patient(txid);
-	CREATE INDEX person_txid_idx ON person(txid);
   EOT
 }
 `

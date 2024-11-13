@@ -18,15 +18,15 @@ type DbMigration struct {
 	Sql string `json:"sql"`
 }
 
-func (apiClient *ApiClient) CreateDbMigration(ctx context.Context, migration *DbMigration, boxId string) (*DbMigration, error) {
+func (apiClient *ApiClient) CreateDbMigration(ctx context.Context, migration *DbMigration) (*DbMigration, error) {
 	response := &[]DbMigration{}
 	migrations := []DbMigration{*migration}
-	err := apiClient.post(ctx, migrations, "/db/migrations", boxId, response)
+	err := apiClient.post(ctx, migrations, "/db/migrations", response)
 	if err != nil {
 		return nil, err
 	}
 
-	createdMigration, err := apiClient.GetDbMigration(ctx, migration.Id, boxId)
+	createdMigration, err := apiClient.GetDbMigration(ctx, migration.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -34,9 +34,9 @@ func (apiClient *ApiClient) CreateDbMigration(ctx context.Context, migration *Db
 	return createdMigration, nil
 }
 
-func (apiClient *ApiClient) GetDbMigration(ctx context.Context, id, boxId string) (*DbMigration, error) {
+func (apiClient *ApiClient) GetDbMigration(ctx context.Context, id string) (*DbMigration, error) {
 	response := &[]DbMigration{}
-	err := apiClient.get(ctx, "/db/migrations", boxId, response)
+	err := apiClient.get(ctx, "/db/migrations", response)
 	if err != nil {
 		return nil, err
 	}

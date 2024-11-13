@@ -72,7 +72,7 @@ resource "aidbox_access_policy" "example" {
 const testAccResourceAccessPolicy_allow = `
 resource "aidbox_client" "client" {
   name        = "client-id"
-  secret      = "secret"
+  secret      = "__sha256:2BB80D537B1DA3E38BD30361AA855686BDE0EACD7162FEF6A25FE97BF527A25B"
   grant_types = ["basic"]
 }
 resource "aidbox_access_policy" "mypolicy" {

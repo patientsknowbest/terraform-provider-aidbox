@@ -44,19 +44,17 @@ To generate or update documentation, run `go generate`.
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
-Note: you could run into this error during testing with some state stuck in
-`Error: unexpected status code from RPC request 422 422 Unprocessable Entity [{"error":{"message":"Box mybox already exists"}}]`
-Sometimes not even bringing up a new stack via compose helps, try running `docker container prune` for the containers created by docker-compose.
-
 Acceptance tests require an aidbox server to run against. 
 
 You can start aidbox in docker with the provided [docker-compose](scripts/docker-compose.yaml) file.
 
 Trial license can be obtained either
-- as per [aidbox documentation](https://docs.aidbox.app/getting-started/run-aidbox-locally-with-docker)
-- we can also issue our own development licenses from now on, ask around for these
+- as per [aidbox documentation](https://docs.aidbox.app/overview/aidbox-user-portal/licenses)
+- we can also issue our own development licenses from now on, ask around for these, or try accessing the [user portal](https://aidbox.app/ui/portal#/project/f07750f6-28e3-44be-a8f8-c2004ef2b1ea/license)
 
 ```sh
-$ (cd scripts && AIDBOX_LICENSE=<your-devbox-license> MB_LICENSE=<your-multibox-license> docker-compose up -d)
+$ (cd scripts && AIDBOX_LICENSE=<your-aidbox-license> docker-compose up -d)
 $ make testacc
 ```
+# TODO (AS) regenerate docs
+# TODO (AS) format
