@@ -8,6 +8,7 @@ type AidboxTopicDestination struct {
 	ResourceBase
 	Topic     string                  `json:"topic"`
 	Kind      string                  `json:"kind"`
+	Content   string                  `json:"content"`
 	Parameter []SubscriptionParameter `json:"parameter"`
 }
 

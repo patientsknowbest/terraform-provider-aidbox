@@ -56,5 +56,25 @@ Trial license can be obtained either
 $ (cd scripts && AIDBOX_LICENSE=<your-aidbox-license> docker-compose up -d)
 $ make testacc
 ```
+
+## Trying out the provider without releasing
+
+Once the provider is in a suitable state, further to the above testing you can try it out by pointing terraform to look
+for your build of the provider and use that instead of a released version. Put this in a CLI configuration file (e.g.
+into a file called .terraformrc in your home dir)
+
+```terraform
+# https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers
+# override all provider installations
+provider_installation {
+  # override this specific provider
+  dev_overrides {
+    "patientsknowbest/aidbox" = "/home/plugin-developer/go/bin"
+  }
+  # must also tell terraform how to look for other providers
+  direct {}
+}
+```
+
 # TODO (AS) regenerate docs
 # TODO (AS) format

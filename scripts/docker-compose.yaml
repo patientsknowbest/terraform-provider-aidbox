@@ -13,7 +13,8 @@ services:
     depends_on:
       - database-devbox
     # https://docs.aidbox.app/overview/release-notes#october-2024-latest-2410-lts
-    image: "healthsamurai/aidboxone:2410"
+    #image: "healthsamurai/aidboxone:2410"
+    image: "healthsamurai/aidboxone:edge"
     ports:
       - "8888:8888"
     environment:

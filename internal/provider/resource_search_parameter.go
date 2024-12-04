@@ -104,13 +104,14 @@ func mapSearchParameterFromData(data *schema.ResourceData) (*aidbox.SearchParame
 
 func mapSearchParameterToData(res *aidbox.SearchParameter, data *schema.ResourceData) {
 	data.SetId(res.ID)
-	data.Set("name", res.Name)
-	data.Set("type", res.Type.ToString())
-	data.Set("description", res.Description)
-	data.Set("url", res.Url)
-	data.Set("code", res.Code)
 	data.Set("base", res.Base)
+	data.Set("code", res.Code)
+	data.Set("description", res.Description)
 	data.Set("expression", res.Expression)
+	data.Set("name", res.Name)
+	data.Set("status", res.Status)
+	data.Set("type", res.Type.ToString())
+	data.Set("url", res.Url)
 }
 
 func resourceSearchParameterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

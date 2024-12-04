@@ -27,9 +27,9 @@ func (t AidboxError) Error() string {
 
 func NewApiClient(URL, username, password string) *ApiClient {
 	return &ApiClient{
-		URL:        URL,
-		Username:   username,
-		Password:   password,
+		URL:      URL,
+		Username: username,
+		Password: password,
 	}
 }
 
@@ -92,8 +92,7 @@ func (apiClient *ApiClient) createResource(ctx context.Context, resource Resourc
 	}
 	// TODO (AS) do the same for all methods
 	if res.StatusCode != http.StatusCreated {
-		json.NewEncoder(&buf).Encode(resource)
-		return nil, fmt.Errorf("unexpected status code (%d) received: %s, response body: %s\nrequest sent:%s", res.StatusCode, res.Status, body, buf.String())
+		return nil, debugError(req, res, resource, body)
 	}
 	if err != nil {
 		return nil, err
@@ -221,4 +220,34 @@ func (apiClient *ApiClient) get(ctx context.Context, relativePath string, respon
 		return err
 	}
 	return json.Unmarshal(b, responseT)
+}
+
+func debugError(request *http.Request, response *http.Response, requestBody interface{}, responseBody []byte) error {
+	prettyRequest, err := json.MarshalIndent(requestBody, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	var prettyResponse bytes.Buffer
+	err = json.Indent(&prettyResponse, responseBody, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	prettyHeaders, err := json.MarshalIndent(request.Header, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Errorf("unexpected status code (%d) received: %s\n"+
+		"request url: %s %s\n"+
+		"request headers:\n"+
+		"%s\n"+
+		"request sent:\n"+
+		"%s\n"+
+		"response body:\n"+
+		"%s\n",
+		response.StatusCode,
+		response.Status,
+		request.Method, request.URL.String(),
+		prettyHeaders,
+		prettyRequest,
+		prettyResponse.String())
 }

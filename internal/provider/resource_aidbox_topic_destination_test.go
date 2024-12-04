@@ -38,6 +38,8 @@ resource "aidbox_aidbox_subscription_topic" "patient_changes" {
 
 resource "aidbox_aidbox_topic_destination" "patient_changes" {
   topic = aidbox_aidbox_subscription_topic.patient_changes.url
+  kind = "webhook"
+  content = "id-only"
   parameter {
     name = "endpoint"
     url = "https://aidbox.requestcatcher.com/patient-webhook"

@@ -2,14 +2,15 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 )
 
 const (
-	WebhookKind    = "webhook-at-least-once"
-	WebhookProfile = "http://aidbox.app/StructureDefinition/aidboxtopicdestination-webhook-at-least-once"
+	KindTemplate        = "%s-at-least-once"
+	KindProfileTemplate = "http://aidbox.app/StructureDefinition/aidboxtopicdestination-%s-at-least-once"
 )
 
 func resourceAidboxTopicDestination() *schema.Resource {
@@ -30,6 +31,16 @@ func resourceSchemaAidboxTopicDestination() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"topic": {
 			Description: "Unique URL of the topic to subscribe on",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
+		"kind": {
+			Description: "One of kafka, webhook or gcp-pubsub",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
+		"content": {
+			Description: "One of full-resource, id-only or empty",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
@@ -68,6 +79,7 @@ func resourceSchemaAidboxTopicDestination() map[string]*schema.Schema {
 func mapAidboxTopicDestinationFromData(data *schema.ResourceData) (*aidbox.AidboxTopicDestination, error) {
 	res := &aidbox.AidboxTopicDestination{}
 	res.Topic = data.Get("topic").(string)
+	res.Content = data.Get("content").(string)
 
 	// parameter
 	rawParameter := data.Get("parameter").([]interface{})
@@ -83,10 +95,11 @@ func mapAidboxTopicDestinationFromData(data *schema.ResourceData) (*aidbox.Aidbo
 	}
 	res.Parameter = parameter
 
-	// TODO (AS) update to new type (pubsub) when that's implemented, potentially allowing all kinds of destinations
-	res.Kind = WebhookKind
+	// kind
+	kind := data.Get("kind").(string)
+	res.Kind = fmt.Sprintf(KindTemplate, kind)
 	res.Meta = &aidbox.ResourceBaseMeta{
-		Profile: []string{WebhookProfile},
+		Profile: []string{fmt.Sprintf(KindProfileTemplate, kind)},
 	}
 
 	return res, nil
