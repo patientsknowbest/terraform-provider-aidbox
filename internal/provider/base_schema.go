@@ -11,13 +11,6 @@ import (
 
 func baseBoxResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"box_id": {
-			Description: "ID of box this object lives in",
-			Type:        schema.TypeString,
-			Default:     "",
-			Optional:    true,
-			ForceNew:    true, // Changing the box_id always forces replacement
-		},
 		//"meta": {
 		//	Description: "Metadata for the resource",
 		//	Type:        schema.TypeList,

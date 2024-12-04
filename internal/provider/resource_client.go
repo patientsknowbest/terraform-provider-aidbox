@@ -15,10 +15,10 @@ func resourceClient() *schema.Resource {
 		ReadContext:   resourceClientRead,
 		UpdateContext: resourceClientUpdate,
 		DeleteContext: resourceClientDelete,
-		Importer:      &schema.ResourceImporter{
+		Importer: &schema.ResourceImporter{
 			StateContext: resourceClientImport,
 		},
-		Schema:        resourceFullSchema(resourceSchemaClient()),
+		Schema: resourceFullSchema(resourceSchemaClient()),
 	}
 }
 
@@ -81,7 +81,7 @@ func resourceClientCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	res, err := apiClient.CreateClient(ctx, q, boxIdFromData(d))
+	res, err := apiClient.CreateClient(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -91,7 +91,7 @@ func resourceClientCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceClientRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetClient(ctx, d.Id(), boxIdFromData(d))
+	res, err := apiClient.GetClient(ctx, d.Id())
 	if err != nil {
 		if handleNotFoundError(err, d) {
 			return nil
@@ -108,7 +108,7 @@ func resourceClientUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	ac, err := apiClient.UpdateClient(ctx, q, boxIdFromData(d))
+	ac, err := apiClient.UpdateClient(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -118,7 +118,7 @@ func resourceClientUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceClientDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	err := apiClient.DeleteClient(ctx, d.Id(), boxIdFromData(d))
+	err := apiClient.DeleteClient(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,7 +127,7 @@ func resourceClientDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceClientImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetClient(ctx, d.Id(), boxIdFromData(d))
+	res, err := apiClient.GetClient(ctx, d.Id())
 	if err != nil {
 		return nil, err
 	}

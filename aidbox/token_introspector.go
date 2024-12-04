@@ -81,30 +81,30 @@ func (g *TokenIntrospectorType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (apiClient *ApiClient) CreateTokenIntrospector(ctx context.Context, introspector *TokenIntrospector, boxId string) (*TokenIntrospector, error) {
-	rr, err := apiClient.createResource(ctx, introspector, boxId)
+func (apiClient *ApiClient) CreateTokenIntrospector(ctx context.Context, introspector *TokenIntrospector) (*TokenIntrospector, error) {
+	rr, err := apiClient.createResource(ctx, introspector)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*TokenIntrospector), nil
 }
 
-func (apiClient *ApiClient) GetTokenIntrospector(ctx context.Context, id, boxId string) (*TokenIntrospector, error) {
-	rr, err := apiClient.getResource(ctx, "/TokenIntrospector/"+id, boxId)
+func (apiClient *ApiClient) GetTokenIntrospector(ctx context.Context, id string) (*TokenIntrospector, error) {
+	rr, err := apiClient.getResource(ctx, "/TokenIntrospector/"+id)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*TokenIntrospector), nil
 }
 
-func (apiClient *ApiClient) UpdateTokenIntrospector(ctx context.Context, q *TokenIntrospector, boxId string) (*TokenIntrospector, error) {
-	rr, err := apiClient.updateResource(ctx, q, boxId)
+func (apiClient *ApiClient) UpdateTokenIntrospector(ctx context.Context, q *TokenIntrospector) (*TokenIntrospector, error) {
+	rr, err := apiClient.updateResource(ctx, q)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*TokenIntrospector), nil
 }
 
-func (apiClient *ApiClient) DeleteTokenIntrospector(ctx context.Context, id, boxId string) error {
-	return apiClient.deleteResource(ctx, "/TokenIntrospector/"+id, boxId)
+func (apiClient *ApiClient) DeleteTokenIntrospector(ctx context.Context, id string) error {
+	return apiClient.deleteResource(ctx, "/TokenIntrospector/"+id)
 }

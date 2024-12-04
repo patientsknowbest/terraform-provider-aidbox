@@ -30,7 +30,6 @@ resource "aidbox_token_introspector" "example" {
 
 ### Optional
 
-- `box_id` (String) ID of box this object lives in
 - `introspection_endpoint` (Block List, Max: 1) Configuration for introspecting opaque access tokens. (see [below for nested schema](#nestedblock--introspection_endpoint))
 - `jwks_uri` (String) Location of JWKS public key information for validating JWT tokens
 - `jwt` (Block List, Max: 1) Configuration for validating jwt type access tokens (see [below for nested schema](#nestedblock--jwt))

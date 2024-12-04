@@ -17,7 +17,7 @@ func dataSourceUser() *schema.Resource {
 
 func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetUser(ctx, d.Get("id").(string), boxIdFromData(d))
+	res, err := apiClient.GetUser(ctx, d.Get("id").(string))
 	if err != nil {
 		if handleNotFoundError(err, d) {
 			return nil

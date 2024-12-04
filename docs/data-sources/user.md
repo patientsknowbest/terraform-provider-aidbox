@@ -23,7 +23,6 @@ data "aidbox_user" "admin_user" {
 
 ### Optional
 
-- `box_id` (String) ID of box this object lives in
 - `two_factor_enabled` (Boolean) if 2FA is enabled for the user
 
 ### Read-Only

@@ -17,10 +17,10 @@ func resourceSearchParameter() *schema.Resource {
 		ReadContext:   resourceSearchParameterRead,
 		UpdateContext: resourceSearchParameterUpdate,
 		DeleteContext: resourceSearchParameterDelete,
-		Importer:      &schema.ResourceImporter{
+		Importer: &schema.ResourceImporter{
 			StateContext: resourceSearchParameterImport,
 		},
-		Schema:        resourceFullSchema(resourceSchemaSearchParameter()),
+		Schema: resourceFullSchema(resourceSchemaSearchParameter()),
 	}
 }
 
@@ -172,7 +172,7 @@ func resourceSearchParameterCreate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	res, err := apiClient.CreateSearchParameter(ctx, q, boxIdFromData(d))
+	res, err := apiClient.CreateSearchParameter(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -182,7 +182,7 @@ func resourceSearchParameterCreate(ctx context.Context, d *schema.ResourceData, 
 
 func resourceSearchParameterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetSearchParameter(ctx, d.Id(), boxIdFromData(d))
+	res, err := apiClient.GetSearchParameter(ctx, d.Id())
 	if err != nil {
 		if handleNotFoundError(err, d) {
 			return nil
@@ -199,7 +199,7 @@ func resourceSearchParameterUpdate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	ac, err := apiClient.UpdateSearchParameter(ctx, q, boxIdFromData(d))
+	ac, err := apiClient.UpdateSearchParameter(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -209,7 +209,7 @@ func resourceSearchParameterUpdate(ctx context.Context, d *schema.ResourceData, 
 
 func resourceSearchParameterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	err := apiClient.DeleteSearchParameter(ctx, d.Id(), boxIdFromData(d))
+	err := apiClient.DeleteSearchParameter(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -218,7 +218,7 @@ func resourceSearchParameterDelete(ctx context.Context, d *schema.ResourceData, 
 
 func resourceSearchParameterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetSearchParameter(ctx, d.Id(), boxIdFromData(d))
+	res, err := apiClient.GetSearchParameter(ctx, d.Id())
 	if err != nil {
 		return nil, err
 	}

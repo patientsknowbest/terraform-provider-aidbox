@@ -101,30 +101,30 @@ func (t *SearchParameterType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (apiClient *ApiClient) CreateSearchParameter(ctx context.Context, searchParameter *SearchParameter, boxId string) (*SearchParameter, error) {
-	c, err := apiClient.createResource(ctx, searchParameter, boxId)
+func (apiClient *ApiClient) CreateSearchParameter(ctx context.Context, searchParameter *SearchParameter) (*SearchParameter, error) {
+	c, err := apiClient.createResource(ctx, searchParameter)
 	if err != nil {
 		return nil, err
 	}
 	return c.(*SearchParameter), nil
 }
 
-func (apiClient *ApiClient) GetSearchParameter(ctx context.Context, id, boxId string) (*SearchParameter, error) {
-	rr, err := apiClient.getResource(ctx, "/SearchParameter/"+id, boxId)
+func (apiClient *ApiClient) GetSearchParameter(ctx context.Context, id string) (*SearchParameter, error) {
+	rr, err := apiClient.getResource(ctx, "/SearchParameter/"+id)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*SearchParameter), nil
 }
 
-func (apiClient *ApiClient) UpdateSearchParameter(ctx context.Context, q *SearchParameter, boxId string) (*SearchParameter, error) {
-	rr, err := apiClient.updateResource(ctx, q, boxId)
+func (apiClient *ApiClient) UpdateSearchParameter(ctx context.Context, q *SearchParameter) (*SearchParameter, error) {
+	rr, err := apiClient.updateResource(ctx, q)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*SearchParameter), nil
 }
 
-func (apiClient *ApiClient) DeleteSearchParameter(ctx context.Context, id, boxId string) error {
-	return apiClient.deleteResource(ctx, "/SearchParameter/"+id, boxId)
+func (apiClient *ApiClient) DeleteSearchParameter(ctx context.Context, id string) error {
+	return apiClient.deleteResource(ctx, "/SearchParameter/"+id)
 }

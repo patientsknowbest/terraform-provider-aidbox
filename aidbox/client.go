@@ -93,30 +93,30 @@ func (g *GrantType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (apiClient *ApiClient) CreateClient(ctx context.Context, client *Client, boxId string) (*Client, error) {
-	c, err := apiClient.createResource(ctx, client, boxId)
+func (apiClient *ApiClient) CreateClient(ctx context.Context, client *Client) (*Client, error) {
+	c, err := apiClient.createResource(ctx, client)
 	if err != nil {
 		return nil, err
 	}
 	return c.(*Client), nil
 }
 
-func (apiClient *ApiClient) GetClient(ctx context.Context, id, boxId string) (*Client, error) {
-	rr, err := apiClient.getResource(ctx, "/Client/"+id, boxId)
+func (apiClient *ApiClient) GetClient(ctx context.Context, id string) (*Client, error) {
+	rr, err := apiClient.getResource(ctx, "/Client/"+id)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*Client), nil
 }
 
-func (apiClient *ApiClient) UpdateClient(ctx context.Context, q *Client, boxId string) (*Client, error) {
-	rr, err := apiClient.updateResource(ctx, q, boxId)
+func (apiClient *ApiClient) UpdateClient(ctx context.Context, q *Client) (*Client, error) {
+	rr, err := apiClient.updateResource(ctx, q)
 	if err != nil {
 		return nil, err
 	}
 	return rr.(*Client), nil
 }
 
-func (apiClient *ApiClient) DeleteClient(ctx context.Context, id, boxId string) error {
-	return apiClient.deleteResource(ctx, "/Client/"+id, boxId)
+func (apiClient *ApiClient) DeleteClient(ctx context.Context, id string) error {
+	return apiClient.deleteResource(ctx, "/Client/"+id)
 }

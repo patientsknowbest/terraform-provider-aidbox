@@ -14,8 +14,8 @@ func (*User) GetResourceName() string {
 	return "User"
 }
 
-func (apiClient *ApiClient) GetUser(ctx context.Context, id, boxId string) (*User, error) {
-	rr, err := apiClient.getResource(ctx, "/User/"+id, boxId)
+func (apiClient *ApiClient) GetUser(ctx context.Context, id string) (*User, error) {
+	rr, err := apiClient.getResource(ctx, "/User/"+id)
 	if err != nil {
 		return nil, err
 	}
