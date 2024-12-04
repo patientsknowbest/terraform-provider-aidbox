@@ -29,12 +29,6 @@ resource "aidbox_client" "example" {
 - `name` (String) Client ID used for authentication
 - `secret` (String, Sensitive) Client secret used for authentication
 
-### Optional
-
-- `box_id` (String) ID of box this object lives in
-
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

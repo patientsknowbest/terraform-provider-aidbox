@@ -39,7 +39,6 @@ resource "aidbox_search_parameter" "example_extension" {
 
 ### Optional
 
-- `box_id` (String) ID of box this object lives in
 - `module` (String) Module name
 
 ### Read-Only
@@ -53,5 +52,3 @@ Required:
 
 - `resource_id` (String) The ID of the referenced resource
 - `resource_type` (String) The type of the referenced resource
-
-

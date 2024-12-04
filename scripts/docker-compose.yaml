@@ -29,30 +29,3 @@ services:
       PGPASSWORD: "postgres"
       PGDATABASE: "postgres"
 
-  database-multibox:
-    # :13.2, pinned on 2022-05-31
-    image: "healthsamurai/aidboxdb@sha256:df7e461f6010eb9746c9361b7a3b83bea9217ac8fe6597cb88026a5f4f83ad8e"
-    ports:
-      - "5438:5432"
-    environment:
-      POSTGRES_USER:     "postgres"
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB:       "postgres"
-
-  multibox:
-    # healthsamurai/multibox:edge
-    image: "healthsamurai/multibox@sha256:3ecd5044b473712592d2460c0ae55409ccce343a800989bdc7de8fb62f434450"
-    ports:
-      - "8889:8889"
-    environment:
-      AIDBOX_LICENSE: "${MB_LICENSE:?err}"
-      AIDBOX_BASE_URL: "http://box.local:8889"
-      AIDBOX_SUPERUSER: "root:secret"
-      AIDBOX_CLUSTER_SECRET: "cluster_secret"
-      AIDBOX_CLUSTER_DOMAIN: "box.local"
-      AIDBOX_PORT: "8889"
-      PGHOST: "database-multibox"
-      PGPORT: "5432"
-      PGUSER: "postgres"
-      PGPASSWORD: "postgres"
-      PGDATABASE: "postgres"

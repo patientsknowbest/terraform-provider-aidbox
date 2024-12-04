@@ -61,7 +61,6 @@ resource "aidbox_access_policy" "example_allow" {
 
 ### Optional
 
-- `box_id` (String) ID of box this object lives in
 - `description` (String) Description of access policy for human users.
 - `link` (Block List) The actor to allow access. Used only if engine is allow. (see [below for nested schema](#nestedblock--link))
 - `schema` (String) JSON-schema policy to be evaluated. Used only if engine is json-schema
@@ -77,5 +76,3 @@ Required:
 
 - `resource_id` (String) The ID of the referenced resource
 - `resource_type` (String) The type of the referenced resource (Client)
-
-

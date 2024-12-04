@@ -8,7 +8,7 @@ import (
 func TestAccResourceSearchParameter_elementNameAndPatternFilterInExpression(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testMultiboxProviderFactories,
+		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceSearchParameter_elementNameAndPatternFilterInExpression,
@@ -30,7 +30,7 @@ func TestAccResourceSearchParameter_elementNameAndPatternFilterInExpression(t *t
 func TestAccResourceSearchParameter_elementNameAndIndexInExpression(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testMultiboxProviderFactories,
+		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceSearchParameter_elementNameAndIndexInExpression,
@@ -53,7 +53,7 @@ func TestAccResourceSearchParameter_elementNameAndIndexInExpression(t *testing.T
 func TestAccResourceSearchParameter_extension(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testMultiboxProviderFactories,
+		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceSearchParameter_extension,
@@ -74,13 +74,7 @@ func TestAccResourceSearchParameter_extension(t *testing.T) {
 }
 
 const testAccResourceSearchParameter_elementNameAndPatternFilterInExpression = `
-resource "aidbox_box" "yourbox" {
-  name         = "yourbox"
-  fhir_version = "fhir-4.0.1" 
-  description  = "A box instance within multibox, a multi-tenant aidbox server"
-}
 resource "aidbox_search_parameter" "example_phone" {
-  box_id   = aidbox_box.yourbox.name
   name     = "phone-number"
   module   = "fhir-4.0.1"
   type     = "string"
@@ -93,13 +87,7 @@ resource "aidbox_search_parameter" "example_phone" {
 `
 
 const testAccResourceSearchParameter_elementNameAndIndexInExpression = `
-resource "aidbox_box" "yourbox" {
-  name         = "yourbox"
-  fhir_version = "fhir-4.0.1" 
-  description  = "A box instance within multibox, a multi-tenant aidbox server"
-}
 resource "aidbox_search_parameter" "example_name" {
-  box_id   = aidbox_box.yourbox.name
   name     = "first-name"
   type     = "string"
   reference {
@@ -111,13 +99,7 @@ resource "aidbox_search_parameter" "example_name" {
 `
 
 const testAccResourceSearchParameter_extension = `
-resource "aidbox_box" "yourbox" {
-  name         = "yourbox"
-  fhir_version = "fhir-4.0.1" 
-  description  = "A box instance within multibox, a multi-tenant aidbox server"
-}
 resource "aidbox_search_parameter" "example_extension" {
-  box_id   = aidbox_box.yourbox.name
   name     = "custom-date"
   type     = "date"
   reference {

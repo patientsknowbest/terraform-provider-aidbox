@@ -17,10 +17,10 @@ func resourceDbMigration() *schema.Resource {
 		ReadContext:   resourceDbMigrationRead,
 		UpdateContext: resourceDbMigrationUpdate,
 		DeleteContext: resourceDbMigrationDelete,
-		Importer:      &schema.ResourceImporter{
+		Importer: &schema.ResourceImporter{
 			StateContext: resourceDbMigrationImport,
 		},
-		Schema:        resourceFullSchema(resourceSchemaDbMigration()),
+		Schema: resourceFullSchema(resourceSchemaDbMigration()),
 	}
 }
 
@@ -40,7 +40,7 @@ func mapDbMigrationFromData(data *schema.ResourceData) *aidbox.DbMigration {
 func resourceDbMigrationCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
 	migration := mapDbMigrationFromData(data)
-	result, err := apiClient.CreateDbMigration(ctx, migration, boxIdFromData(data))
+	result, err := apiClient.CreateDbMigration(ctx, migration)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -50,7 +50,7 @@ func resourceDbMigrationCreate(ctx context.Context, data *schema.ResourceData, m
 
 func resourceDbMigrationRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	result, err := apiClient.GetDbMigration(ctx, data.Id(), boxIdFromData(data))
+	result, err := apiClient.GetDbMigration(ctx, data.Id())
 	if err != nil {
 		if handleNotFoundError(err, data) {
 			return nil
@@ -85,7 +85,7 @@ func resourceDbMigrationDelete(ctx context.Context, data *schema.ResourceData, m
 
 func resourceDbMigrationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetDbMigration(ctx, d.Id(), boxIdFromData(d))
+	res, err := apiClient.GetDbMigration(ctx, d.Id())
 	if err != nil {
 		return nil, err
 	}

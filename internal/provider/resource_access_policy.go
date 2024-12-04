@@ -18,10 +18,10 @@ func resourceAccessPolicy() *schema.Resource {
 		ReadContext:   resourceAccessPolicyRead,
 		UpdateContext: resourceAccessPolicyUpdate,
 		DeleteContext: resourceAccessPolicyDelete,
-		Importer:      &schema.ResourceImporter{
+		Importer: &schema.ResourceImporter{
 			StateContext: resourceAccessPolicyImport,
 		},
-		Schema:        resourceFullSchema(resourceSchemaAccessPolicy()),
+		Schema: resourceFullSchema(resourceSchemaAccessPolicy()),
 	}
 }
 
@@ -73,7 +73,7 @@ func mapAccessPolicyFromData(d *schema.ResourceData) *aidbox.AccessPolicy {
 func resourceAccessPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
 	q := mapAccessPolicyFromData(d)
-	res, err := apiClient.CreateAccessPolicy(ctx, q, boxIdFromData(d))
+	res, err := apiClient.CreateAccessPolicy(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -83,7 +83,7 @@ func resourceAccessPolicyCreate(ctx context.Context, d *schema.ResourceData, met
 
 func resourceAccessPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetAccessPolicy(ctx, d.Id(), boxIdFromData(d))
+	res, err := apiClient.GetAccessPolicy(ctx, d.Id())
 	if err != nil {
 		if handleNotFoundError(err, d) {
 			return nil
@@ -97,7 +97,7 @@ func resourceAccessPolicyRead(ctx context.Context, d *schema.ResourceData, meta 
 func resourceAccessPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
 	q := mapAccessPolicyFromData(d)
-	ti, err := apiClient.UpdateAccessPolicy(ctx, q, boxIdFromData(d))
+	ti, err := apiClient.UpdateAccessPolicy(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -107,7 +107,7 @@ func resourceAccessPolicyUpdate(ctx context.Context, d *schema.ResourceData, met
 
 func resourceAccessPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	err := apiClient.DeleteAccessPolicy(ctx, d.Id(), boxIdFromData(d))
+	err := apiClient.DeleteAccessPolicy(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +116,7 @@ func resourceAccessPolicyDelete(ctx context.Context, d *schema.ResourceData, met
 
 func resourceAccessPolicyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	apiClient := meta.(*aidbox.ApiClient)
-	res, err := apiClient.GetAccessPolicy(ctx, d.Id(), boxIdFromData(d))
+	res, err := apiClient.GetAccessPolicy(ctx, d.Id())
 	if err != nil {
 		return nil, err
 	}

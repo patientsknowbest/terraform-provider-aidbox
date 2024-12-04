@@ -16,7 +16,6 @@ https://docs.aidbox.app/modules-1/aidbox-search/usdpsql#sql-migrations
 
 ```terraform
 resource "aidbox_db_migration" "add_gin_index_on_appointment_and_patient" {
-  box_id = aidbox_box.mybox.name
   name   = "add_gin_index_on_appointment_and_patient"
   sql    = <<-EOT
     CREATE INDEX appointment_resource_idx ON public.appointment USING gin (resource);
@@ -33,12 +32,6 @@ resource "aidbox_db_migration" "add_gin_index_on_appointment_and_patient" {
 - `name` (String) Unique name for the migration, e.g. add_gin_index_to_patient
 - `sql` (String) The sql migration script
 
-### Optional
-
-- `box_id` (String) ID of box this object lives in
-
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
