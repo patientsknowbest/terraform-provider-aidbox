@@ -77,5 +77,3 @@ Required:
 
 - `resource_id` (String) The ID of the referenced resource
 - `resource_type` (String) The type of the referenced resource (Client)
-
-

@@ -53,7 +53,9 @@ func New(apiClient *aidbox.ApiClient) func() *schema.Provider {
 					Optional:    true,
 				},
 			},
-			DataSourcesMap: map[string]*schema.Resource{},
+			DataSourcesMap: map[string]*schema.Resource{
+				"aidbox_user": dataSourceUser(),
+			},
 			ResourcesMap: map[string]*schema.Resource{
 				"aidbox_token_introspector": resourceTokenIntrospector(),
 				"aidbox_access_policy":      resourceAccessPolicy(),

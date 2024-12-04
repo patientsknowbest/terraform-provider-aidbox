@@ -40,5 +40,3 @@ resource "aidbox_db_migration" "add_gin_index_on_appointment_and_patient" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

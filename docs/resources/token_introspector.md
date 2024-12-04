@@ -58,5 +58,3 @@ Required:
 Optional:
 
 - `secret` (String) The secret used to sign the JWT
-
-

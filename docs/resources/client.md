@@ -36,5 +36,3 @@ resource "aidbox_client" "example" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
