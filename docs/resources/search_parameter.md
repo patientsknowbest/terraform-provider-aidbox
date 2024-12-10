@@ -32,23 +32,18 @@ resource "aidbox_search_parameter" "example_extension" {
 
 ### Required
 
-- `expression` (List of String) Expression for elements to search. Accepts three types: name of element / index / filter by pattern in collection. For filter, separator (|) must be used: {"system": "phone"} => "system|phone"
+- `base` (List of String) The resource type(s) this search parameter applies to
+- `code` (String) Code used in URL
+- `description` (String) Natural language description of the search parameter
+- `expression` (String) FHIRPath expression that extracts the values, see https://hl7.org/fhir/fhirpath.html
 - `name` (String) Name of search parameter, used in search query string
-- `reference` (Block List, Min: 1, Max: 1) Reference to resource this search param attached to (see [below for nested schema](#nestedblock--reference))
 - `type` (String) Type of search parameter
+- `url` (String) Canonical identifier for this search parameter, represented as a URI (globally unique)
 
 ### Optional
 
-- `module` (String) Module name
+- `status` (String) Value of draft | active | retired | unknown, see https://hl7.org/fhir/R4/valueset-publication-status.html
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-<a id="nestedblock--reference"></a>
-### Nested Schema for `reference`
-
-Required:
-
-- `resource_id` (String) The ID of the referenced resource
-- `resource_type` (String) The type of the referenced resource

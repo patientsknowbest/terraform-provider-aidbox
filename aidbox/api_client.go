@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
+	"os"
+	"path"
 )
 
 type ApiClient struct {
@@ -36,137 +37,37 @@ func isAlright(statusCode int) bool {
 	return statusCode >= http.StatusOK && statusCode < http.StatusBadRequest
 }
 
-// Horrid double unmarshal business to do discriminators on incoming json objects.
-func parseResource(in []byte) (Resource, error) {
-	s := struct {
-		ResourceType string `json:"resourceType"`
-	}{}
-	err := json.Unmarshal(in, &s)
-	if err != nil {
-		return nil, err
-	}
-	var r Resource
-	switch s.ResourceType {
-	case "TokenIntrospector":
-		r = &TokenIntrospector{}
-	case "AccessPolicy":
-		r = &AccessPolicy{}
-	case "Client":
-		r = &Client{}
-	case "SearchParameter":
-		r = &SearchParameter{}
-	case "User":
-		r = &User{}
-	default:
-		return nil, fmt.Errorf("Unsupported resource type %s", s.ResourceType)
-	}
-	err = json.Unmarshal(in, &r)
-	return r, err
+func (apiClient *ApiClient) createResource(ctx context.Context, resource Resource, responseTarget any) error {
+	return apiClient.post(ctx, resource, path.Join("/", resource.GetResourcePath()), responseTarget)
 }
 
-func (apiClient *ApiClient) createResource(ctx context.Context, resource Resource) (Resource, error) {
-	buf := bytes.Buffer{}
-	err := json.NewEncoder(&buf).Encode(resource)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiClient.URL+"/"+resource.GetResourceName(), &buf)
-	if err != nil {
-		return nil, err
-	}
-
-	apiClient.addAuthAndHost(req)
-	req.Header.Set("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("unexpected status code received %d %s", res.StatusCode, res.Status)
-	}
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return parseResource(b)
+func (apiClient *ApiClient) getResource(ctx context.Context, id string, responseTarget Resource) error {
+	return apiClient.get(ctx, path.Join("/", responseTarget.GetResourcePath(), id), responseTarget)
 }
 
-func (apiClient *ApiClient) getResource(ctx context.Context, relativePath string) (Resource, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiClient.URL+relativePath, nil)
-	if err != nil {
-		return nil, err
-	}
-	apiClient.addAuthAndHost(req)
-	req.Header.Set("Accept", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode == http.StatusNotFound {
-		return nil, NotFoundError
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
-	}
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return parseResource(b)
+func (apiClient *ApiClient) updateResource(ctx context.Context, resource Resource, responseTarget any) error {
+	return apiClient.put(ctx, resource, path.Join("/", resource.GetResourcePath()), responseTarget)
 }
 
-func (apiClient *ApiClient) updateResource(ctx context.Context, resource Resource) (Resource, error) {
-	buf := bytes.Buffer{}
-	err := json.NewEncoder(&buf).Encode(resource)
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("[TRACE] sending [[ %s ]]", buf.String())
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, apiClient.URL+"/"+resource.GetResourceName()+"/"+resource.GetID(), &buf)
-	if err != nil {
-		return nil, err
-	}
-	apiClient.addAuthAndHost(req)
-	req.Header.Set("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if !isAlright(res.StatusCode) {
-		return nil, fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
-	}
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return parseResource(b)
+func (apiClient *ApiClient) deleteResource(ctx context.Context, id string, responseTarget Resource) error {
+	return apiClient.send(ctx, struct{}{}, path.Join("/", responseTarget.GetResourcePath(), id), &struct{}{}, http.MethodDelete)
 }
 
-func (apiClient *ApiClient) deleteResource(ctx context.Context, relativePath string) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, apiClient.URL+relativePath, nil)
-	if err != nil {
-		return err
-	}
-	apiClient.addAuthAndHost(req)
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	if !isAlright(res.StatusCode) {
-		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
-	}
-	return nil
+func (apiClient *ApiClient) put(ctx context.Context, requestBody interface{}, relativePath string, responseT interface{}) error {
+	return apiClient.send(ctx, requestBody, relativePath, responseT, http.MethodPut)
 }
 
 func (apiClient *ApiClient) post(ctx context.Context, requestBody interface{}, relativePath string, responseT interface{}) error {
+	return apiClient.send(ctx, requestBody, relativePath, responseT, http.MethodPost)
+}
+
+func (apiClient *ApiClient) send(ctx context.Context, requestBody interface{}, relativePath string, responseT interface{}, httpMethod string) error {
 	buf := bytes.Buffer{}
 	err := json.NewEncoder(&buf).Encode(requestBody)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiClient.URL+relativePath, &buf)
+	req, err := http.NewRequestWithContext(ctx, httpMethod, apiClient.URL+relativePath, &buf)
 	if err != nil {
 		return err
 	}
@@ -177,14 +78,14 @@ func (apiClient *ApiClient) post(ctx context.Context, requestBody interface{}, r
 	if err != nil {
 		return err
 	}
-	if !isAlright(res.StatusCode) {
-		return fmt.Errorf("unexpected status code received %d %s", res.StatusCode, res.Status)
-	}
-	b, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(b, responseT)
+	if !isAlright(res.StatusCode) {
+		return errorToTerraform(req, res, requestBody, body)
+	}
+	return json.Unmarshal(body, responseT)
 }
 
 func (apiClient *ApiClient) get(ctx context.Context, relativePath string, responseT interface{}) error {
@@ -198,21 +99,58 @@ func (apiClient *ApiClient) get(ctx context.Context, relativePath string, respon
 	if err != nil {
 		return err
 	}
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
 
 	if res.StatusCode == http.StatusNotFound {
 		return NotFoundError
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code %d %s", res.StatusCode, res.Status)
+	if !isAlright(res.StatusCode) {
+		return errorToTerraform(req, res, struct{}{}, body)
 	}
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(b, responseT)
+	return json.Unmarshal(body, responseT)
 }
 
 func (apiClient *ApiClient) addAuthAndHost(req *http.Request) {
 	req.SetBasicAuth(apiClient.Username, apiClient.Password)
+}
+
+// errorToTerraform pretty prints the response body. Very often you get a 422 with useful details in the response body
+// only. Print this into an error so terraform can show it to the user. Request details are also printed during testing.
+func errorToTerraform(request *http.Request, response *http.Response, requestBody interface{}, responseBody []byte) error {
+	var sensitiveDetails = ""
+	var prettyResponse bytes.Buffer
+	err := json.Indent(&prettyResponse, responseBody, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	if os.Getenv("TF_ACC") == "1" {
+		prettyRequest, err := json.MarshalIndent(requestBody, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		prettyHeaders, err := json.MarshalIndent(request.Header, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		sensitiveDetails = fmt.Sprintf("\n\n===== REQUEST HEADERS =====\n"+
+			"%s\n\n"+
+			"===== REQUEST BODY =====\n"+
+			"%s",
+			prettyHeaders,
+			prettyRequest)
+	}
+
+	return fmt.Errorf("unexpected status code (%d) received: %s\n\n"+
+		"===== %s %s =====%s\n\n"+
+		"===== RESPONSE BODY =====\n"+
+		"%s\n",
+		response.StatusCode,
+		response.Status,
+		request.Method, request.URL.String(),
+		sensitiveDetails,
+		prettyResponse.String())
 }

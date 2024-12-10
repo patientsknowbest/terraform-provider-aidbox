@@ -1,2 +1,2 @@
 #!/bin/sh
-PGPASSWORD=postgres psql -wq -h localhost -p 5437 -U postgres -d devbox -f ./remove_test_migrations.sql
+PGPASSWORD=secret psql -wq -h localhost -p 5437 -U aidbox -d aidbox -f ./remove_test_migrations.sql

@@ -15,7 +15,7 @@ type AccessPolicy struct {
 	Link        []Reference        `json:"link,omitempty"`
 }
 
-func (*AccessPolicy) GetResourceName() string {
+func (*AccessPolicy) GetResourcePath() string {
 	return "AccessPolicy"
 }
 
@@ -96,29 +96,20 @@ func (g *AccessPolicyEngine) UnmarshalJSON(b []byte) error {
 }
 
 func (apiClient *ApiClient) CreateAccessPolicy(ctx context.Context, accessPolicy *AccessPolicy) (*AccessPolicy, error) {
-	ap, err := apiClient.createResource(ctx, accessPolicy)
-	if err != nil {
-		return nil, err
-	}
-	return ap.(*AccessPolicy), nil
+	response := &AccessPolicy{}
+	return response, apiClient.createResource(ctx, accessPolicy, response)
 }
 
 func (apiClient *ApiClient) GetAccessPolicy(ctx context.Context, id string) (*AccessPolicy, error) {
-	rr, err := apiClient.getResource(ctx, "/AccessPolicy/"+id)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*AccessPolicy), nil
+	response := &AccessPolicy{}
+	return response, apiClient.getResource(ctx, id, response)
 }
 
 func (apiClient *ApiClient) UpdateAccessPolicy(ctx context.Context, q *AccessPolicy) (*AccessPolicy, error) {
-	rr, err := apiClient.updateResource(ctx, q)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*AccessPolicy), nil
+	response := &AccessPolicy{}
+	return response, apiClient.updateResource(ctx, q, response)
 }
 
 func (apiClient *ApiClient) DeleteAccessPolicy(ctx context.Context, id string) error {
-	return apiClient.deleteResource(ctx, "/AccessPolicy/"+id)
+	return apiClient.deleteResource(ctx, id, &AccessPolicy{})
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 	"log"
-	"strconv"
 	"strings"
 )
 
@@ -31,50 +30,45 @@ func resourceSchemaSearchParameter() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Required:    true,
 		},
-		"module": {
-			Description: "Module name",
-			Type:        schema.TypeString,
-			Optional:    true,
-		},
 		"type": {
 			Description: "Type of search parameter",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
-		"expression": {
-			Description: "Expression for elements to search. " +
-				"Accepts three types: name of element / index / filter by pattern in collection. " +
-				"For filter, separator (|) must be used: {\"system\": \"phone\"} => \"system|phone\"",
-			Type:     schema.TypeList,
-			Required: true,
-			MinItems: 1,
+		"description": {
+			Description: "Natural language description of the search parameter",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
+		"url": {
+			Description: "Canonical identifier for this search parameter, represented as a URI (globally unique)",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
+		"code": {
+			Description: "Code used in URL",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
+		"status": {
+			Description: "Value of draft | active | retired | unknown, see https://hl7.org/fhir/R4/valueset-publication-status.html",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "active",
+		},
+		"base": {
+			Description: "The resource type(s) this search parameter applies to",
+			Type:        schema.TypeList,
+			Required:    true,
+			MinItems:    1,
 			Elem: &schema.Schema{
-				// PathArray in SearchParameter.expression is an array of strings, integers or objects
-				// but in TypeList, "the items are all of the same type defined by the Elem property"
 				Type: schema.TypeString,
 			},
 		},
-		"reference": {
-			Description: "Reference to resource this search param attached to",
-			// not a TypeMap because "using the Elem block to define specific keys for the map is currently not possible"
-			Type:     schema.TypeList,
-			Required: true,
-			MinItems: 1,
-			MaxItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"resource_id": {
-						Description: "The ID of the referenced resource",
-						Type:        schema.TypeString,
-						Required:    true,
-					},
-					"resource_type": {
-						Description: "The type of the referenced resource",
-						Type:        schema.TypeString,
-						Required:    true,
-					},
-				},
-			},
+		"expression": {
+			Description: "FHIRPath expression that extracts the values, see https://hl7.org/fhir/fhirpath.html",
+			Type:        schema.TypeString,
+			Required:    true,
 		},
 	}
 }
@@ -82,7 +76,19 @@ func resourceSchemaSearchParameter() map[string]*schema.Schema {
 func mapSearchParameterFromData(data *schema.ResourceData) (*aidbox.SearchParameter, error) {
 	res := &aidbox.SearchParameter{}
 	res.Name = data.Get("name").(string)
-	res.Module = data.Get("module").(string)
+	res.Description = data.Get("description").(string)
+	res.Url = data.Get("url").(string)
+	res.Code = data.Get("code").(string)
+	res.Status = data.Get("status").(string)
+	res.Expression = data.Get("expression").(string)
+
+	// base
+	rawBase := data.Get("base").([]interface{})
+	base := make([]string, len(rawBase))
+	for i, v := range rawBase {
+		base[i] = v.(string)
+	}
+	res.Base = base
 
 	// type
 	t, err := aidbox.ParseSearchParameterType(data.Get("type").(string))
@@ -91,79 +97,21 @@ func mapSearchParameterFromData(data *schema.ResourceData) (*aidbox.SearchParame
 	}
 	res.Type = t
 
-	// expression
-	rawElements := data.Get("expression").([]interface{})
-	var convertedElements []interface{}
-	for _, e := range rawElements {
-		ex := e.(string)
-		if strings.Contains(ex, "|") {
-			// object - filter by pattern in collection
-			filterElements := strings.Split(ex, "|")
-			filter := map[string]interface{}{
-				filterElements[0]: filterElements[1],
-			}
-			convertedElements = append(convertedElements, filter)
-		} else if index, err := strconv.Atoi(ex); err == nil {
-			// integer - index in collection
-			convertedElements = append(convertedElements, index)
-		} else {
-			// string - name of element
-			convertedElements = append(convertedElements, ex)
-		}
-	}
-	var expression [][]interface{}
-	res.ExpressionElements = append(expression, convertedElements)
-
-	// resource
-	ref := data.Get("reference").([]interface{})[0].(map[string]interface{})
-	r := aidbox.Reference{
-		ResourceId:   ref["resource_id"].(string),
-		ResourceType: ref["resource_type"].(string),
-	}
-	res.Resource = r
-
-	res.ID = res.Resource.ResourceId + "." + res.Name
+	res.ID = strings.Join(res.Base, "-") + "." + res.Name
 
 	return res, nil
 }
 
 func mapSearchParameterToData(res *aidbox.SearchParameter, data *schema.ResourceData) {
 	data.SetId(res.ID)
+	data.Set("base", res.Base)
+	data.Set("code", res.Code)
+	data.Set("description", res.Description)
+	data.Set("expression", res.Expression)
 	data.Set("name", res.Name)
-	data.Set("module", res.Module)
+	data.Set("status", res.Status)
 	data.Set("type", res.Type.ToString())
-
-	// expression
-	var expression []interface{}
-	for _, e := range res.ExpressionElements[0] {
-		stringElem, ok := e.(string)
-		if !ok {
-			// number is not an integer thanks to json.Unmarshal in parseResource: https://pkg.go.dev/encoding/json#Unmarshal
-			// "To unmarshal JSON into an interface value, Unmarshal stores one of these in the interface value:
-			// float64, for JSON numbers"
-			floatElem, ok := e.(float64)
-			if ok {
-				expression = append(expression, strconv.FormatFloat(floatElem, 'f', -1, 64))
-			} else {
-				var mapElem string
-				for k, v := range e.(map[string]interface{}) {
-					mapElem = k + "|" + v.(string)
-				}
-				expression = append(expression, mapElem)
-			}
-		} else {
-			expression = append(expression, stringElem)
-		}
-	}
-	data.Set("expression", expression)
-
-	// resource
-	var ref []interface{}
-	r := map[string]string{
-		"resource_id":   res.Resource.ResourceId,
-		"resource_type": res.Resource.ResourceType,
-	}
-	data.Set("reference", append(ref, r))
+	data.Set("url", res.Url)
 }
 
 func resourceSearchParameterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

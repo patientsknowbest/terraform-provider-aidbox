@@ -15,7 +15,7 @@ type TokenIntrospector struct {
 	Type                       TokenIntrospectorType       `json:"type"`
 }
 
-func (*TokenIntrospector) GetResourceName() string {
+func (*TokenIntrospector) GetResourcePath() string {
 	return "TokenIntrospector"
 }
 
@@ -82,29 +82,20 @@ func (g *TokenIntrospectorType) UnmarshalJSON(b []byte) error {
 }
 
 func (apiClient *ApiClient) CreateTokenIntrospector(ctx context.Context, introspector *TokenIntrospector) (*TokenIntrospector, error) {
-	rr, err := apiClient.createResource(ctx, introspector)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*TokenIntrospector), nil
+	response := &TokenIntrospector{}
+	return response, apiClient.createResource(ctx, introspector, response)
 }
 
 func (apiClient *ApiClient) GetTokenIntrospector(ctx context.Context, id string) (*TokenIntrospector, error) {
-	rr, err := apiClient.getResource(ctx, "/TokenIntrospector/"+id)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*TokenIntrospector), nil
+	response := &TokenIntrospector{}
+	return response, apiClient.getResource(ctx, id, response)
 }
 
 func (apiClient *ApiClient) UpdateTokenIntrospector(ctx context.Context, q *TokenIntrospector) (*TokenIntrospector, error) {
-	rr, err := apiClient.updateResource(ctx, q)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*TokenIntrospector), nil
+	response := &TokenIntrospector{}
+	return response, apiClient.updateResource(ctx, q, response)
 }
 
 func (apiClient *ApiClient) DeleteTokenIntrospector(ctx context.Context, id string) error {
-	return apiClient.deleteResource(ctx, "/TokenIntrospector/"+id)
+	return apiClient.deleteResource(ctx, id, &TokenIntrospector{})
 }
