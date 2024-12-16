@@ -1,18 +1,18 @@
-version: '3.8'
 services:
   database-devbox:
-    # :13.2, pinned on 2022-05-31
-    image: "healthsamurai/aidboxdb@sha256:df7e461f6010eb9746c9361b7a3b83bea9217ac8fe6597cb88026a5f4f83ad8e"
+    image: "healthsamurai/aidboxdb:16.1"
     ports:
       - "5437:5432"
     environment:
-      POSTGRES_USER:     "postgres"
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB:       "postgres"
-
+      POSTGRES_USER: aidbox
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: aidbox
+      POSTGRES_PORT: "5432"
   devbox:
-    # healthsamurai/aidboxone:edge, pinned on 2022-10-20
-    image: "healthsamurai/aidboxone@sha256:dc25aa007dab5570317d812aeff3ca5a6b055b7300b5b66e6d6cdaa6d97f0f7f"
+    depends_on:
+      - database-devbox
+    # https://docs.aidbox.app/overview/release-notes#november-2024-latest-2411
+    image: "healthsamurai/aidboxone:2411"
     ports:
       - "8888:8888"
     environment:
@@ -23,9 +23,15 @@ services:
       AIDBOX_ADMIN_ID: "admin"
       AIDBOX_ADMIN_PASSWORD: "secret"
       AIDBOX_PORT: "8888"
-      AIDBOX_FHIR_VERSION: "4.0.0"
+      AIDBOX_FHIR_VERSION: "4.0.1"
+      AIDBOX_FHIR_PACKAGES: hl7.fhir.r4.core#4.0.1
+      AIDBOX_FHIR_SCHEMA_VALIDATION: true
+      AIDBOX_CREATED_AT_URL: https://aidbox.app/ex/createdAt
+      PGUSER: aidbox
+      PGPASSWORD: secret
+      PGDATABASE: aidbox
       PGPORT: "5432"
-      PGUSER: "postgres"
-      PGPASSWORD: "postgres"
-      PGDATABASE: "postgres"
-
+    healthcheck:
+      test: "curl -f http://localhost:8888/health"
+      interval: 10s
+      retries: 12

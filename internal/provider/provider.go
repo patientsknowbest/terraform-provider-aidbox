@@ -51,11 +51,13 @@ func New(apiClient *aidbox.ApiClient) func() *schema.Provider {
 				"aidbox_user": dataSourceUser(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"aidbox_token_introspector": resourceTokenIntrospector(),
-				"aidbox_access_policy":      resourceAccessPolicy(),
-				"aidbox_client":             resourceClient(),
-				"aidbox_db_migration":       resourceDbMigration(),
-				"aidbox_search_parameter":   resourceSearchParameter(),
+				"aidbox_token_introspector":        resourceTokenIntrospector(),
+				"aidbox_access_policy":             resourceAccessPolicy(),
+				"aidbox_client":                    resourceClient(),
+				"aidbox_db_migration":              resourceDbMigration(),
+				"aidbox_search_parameter":          resourceSearchParameter(),
+				"aidbox_aidbox_subscription_topic": resourceAidboxSubscriptionTopic(),
+				"aidbox_aidbox_topic_destination":  resourceAidboxTopicDestination(),
 			},
 		}
 

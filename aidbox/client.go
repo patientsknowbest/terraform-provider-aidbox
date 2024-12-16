@@ -13,7 +13,7 @@ type Client struct {
 	GrantTypes []GrantType `json:"grant_types"`
 }
 
-func (*Client) GetResourceName() string {
+func (*Client) GetResourcePath() string {
 	return "Client"
 }
 
@@ -94,29 +94,20 @@ func (g *GrantType) UnmarshalJSON(b []byte) error {
 }
 
 func (apiClient *ApiClient) CreateClient(ctx context.Context, client *Client) (*Client, error) {
-	c, err := apiClient.createResource(ctx, client)
-	if err != nil {
-		return nil, err
-	}
-	return c.(*Client), nil
+	response := &Client{}
+	return response, apiClient.createResource(ctx, client, response)
 }
 
 func (apiClient *ApiClient) GetClient(ctx context.Context, id string) (*Client, error) {
-	rr, err := apiClient.getResource(ctx, "/Client/"+id)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*Client), nil
+	response := &Client{}
+	return response, apiClient.getResource(ctx, id, response)
 }
 
 func (apiClient *ApiClient) UpdateClient(ctx context.Context, q *Client) (*Client, error) {
-	rr, err := apiClient.updateResource(ctx, q)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*Client), nil
+	response := &Client{}
+	return response, apiClient.updateResource(ctx, q, response)
 }
 
 func (apiClient *ApiClient) DeleteClient(ctx context.Context, id string) error {
-	return apiClient.deleteResource(ctx, "/Client/"+id)
+	return apiClient.deleteResource(ctx, id, &Client{})
 }

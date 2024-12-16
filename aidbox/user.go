@@ -10,14 +10,11 @@ type User struct {
 	TwoFactor UserTwoFactor `json:"twoFactor"`
 }
 
-func (*User) GetResourceName() string {
+func (*User) GetResourcePath() string {
 	return "User"
 }
 
 func (apiClient *ApiClient) GetUser(ctx context.Context, id string) (*User, error) {
-	rr, err := apiClient.getResource(ctx, "/User/"+id)
-	if err != nil {
-		return nil, err
-	}
-	return rr.(*User), nil
+	response := &User{}
+	return response, apiClient.getResource(ctx, id, response)
 }
