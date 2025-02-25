@@ -81,6 +81,7 @@ func mapSearchParameterFromData(data *schema.ResourceData) (*aidbox.SearchParame
 	res.Code = data.Get("code").(string)
 	res.Status = data.Get("status").(string)
 	res.Expression = data.Get("expression").(string)
+	res.ResourceType = "SearchParameter"
 
 	// base
 	rawBase := data.Get("base").([]interface{})

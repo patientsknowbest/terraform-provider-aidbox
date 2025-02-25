@@ -11,8 +11,8 @@ services:
   devbox:
     depends_on:
       - database-devbox
-    # https://docs.aidbox.app/overview/release-notes#november-2024-latest-2411
-    image: "healthsamurai/aidboxone:2411"
+    # :edge pushed on Feb 25, 2025 at 2:52 pm https://hub.docker.com/layers/healthsamurai/aidboxone/edge/images/sha256-57ecf5e02d0cacaf7c1cf4c1da5f97dbe11d4a07cf69cda25e385af8e2c460a9
+    image: "healthsamurai/aidboxone@sha256:57ecf5e02d0cacaf7c1cf4c1da5f97dbe11d4a07cf69cda25e385af8e2c460a9"
     ports:
       - "8888:8888"
     environment:

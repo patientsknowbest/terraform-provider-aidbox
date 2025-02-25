@@ -9,18 +9,19 @@ import (
 
 type SearchParameter struct {
 	ResourceBase
-	Name        string              `json:"name"`
-	Type        SearchParameterType `json:"type"`
-	Expression  string              `json:"expression"`
-	Description string              `json:"description"`
-	Url         string              `json:"url"`
-	Status      string              `json:"status"`
-	Code        string              `json:"code"`
-	Base        []string            `json:"base"`
+	ResourceType string              `json:"resourceType,omitempty"`
+	Name         string              `json:"name"`
+	Type         SearchParameterType `json:"type"`
+	Expression   string              `json:"expression"`
+	Description  string              `json:"description"`
+	Url          string              `json:"url"`
+	Status       string              `json:"status"`
+	Code         string              `json:"code"`
+	Base         []string            `json:"base"`
 }
 
 func (*SearchParameter) GetResourcePath() string {
-	return "SearchParameter"
+	return "fhir/SearchParameter"
 }
 
 type SearchParameterType int
