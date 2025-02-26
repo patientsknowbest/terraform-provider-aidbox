@@ -85,7 +85,12 @@ func (apiClient *ApiClient) send(ctx context.Context, requestBody interface{}, r
 	if !isAlright(res.StatusCode) {
 		return errorToTerraform(req, res, requestBody, body)
 	}
-	return json.Unmarshal(body, responseT)
+	// Deletes in general return the resource you deleted in the response body, but sometimes not (e.g. SearchParameter)
+	if httpMethod == http.MethodDelete && len(body) == 0 {
+		return nil
+	} else {
+		return json.Unmarshal(body, responseT)
+	}
 }
 
 func (apiClient *ApiClient) get(ctx context.Context, relativePath string, responseT interface{}) error {
