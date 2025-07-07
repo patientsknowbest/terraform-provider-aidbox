@@ -7,21 +7,18 @@ import (
 	"log"
 )
 
+// SearchParameter Aidbox customized representation of FHIR "SearchParameter"
 type SearchParameter struct {
 	ResourceBase
-	ResourceType string              `json:"resourceType,omitempty"`
-	Name         string              `json:"name"`
-	Type         SearchParameterType `json:"type"`
-	Expression   string              `json:"expression"`
-	Description  string              `json:"description"`
-	Url          string              `json:"url"`
-	Status       string              `json:"status"`
-	Code         string              `json:"code"`
-	Base         []string            `json:"base"`
+	Name               string              `json:"name"`
+	Module             string              `json:"module,omitempty"`
+	Type               SearchParameterType `json:"type"`
+	ExpressionElements [][]interface{}     `json:"expression"`
+	Resource           Reference           `json:"resource"`
 }
 
 func (*SearchParameter) GetResourcePath() string {
-	return "fhir/SearchParameter"
+	return "SearchParameter"
 }
 
 type SearchParameterType int
