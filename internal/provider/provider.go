@@ -55,6 +55,7 @@ func New(apiClient *aidbox.ApiClient) func() *schema.Provider {
 				"aidbox_access_policy":             resourceAccessPolicy(),
 				"aidbox_client":                    resourceClient(),
 				"aidbox_db_migration":              resourceDbMigration(),
+				"aidbox_search":                    resourceSearch(),
 				"aidbox_search_parameter":          resourceSearchParameter(),
 				"aidbox_fhir_search_parameter":     resourceSearchParameterV2(),
 				"aidbox_aidbox_subscription_topic": resourceAidboxSubscriptionTopic(),
