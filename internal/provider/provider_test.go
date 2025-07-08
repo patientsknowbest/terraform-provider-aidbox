@@ -46,3 +46,17 @@ func testAccPreCheck(t *testing.T) {
 	// about the appropriate environment variables being set are common to see in a pre-check
 	// function.
 }
+
+// Used to skip tests that require a legacy mode of operation / incompatible with schema mode
+func requireLegacyMode(t *testing.T) {
+	if os.Getenv("TF_ACC_AIDBOX_MODE") != "legacy" {
+		t.Skip("Test is not compatible with schema mode, skipping")
+	}
+}
+
+// Used to skip tests that are incompatible with older modes of operation / schema mode
+func requireSchemaMode(t *testing.T) {
+	if os.Getenv("TF_ACC_AIDBOX_MODE") == "legacy" {
+		t.Skip("Test is not compatible with non-schema mode, skipping")
+	}
+}

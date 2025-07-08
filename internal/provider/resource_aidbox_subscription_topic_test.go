@@ -7,7 +7,7 @@ import (
 
 func TestAccAidboxSubscriptionTopic_triggerPatientEvents(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck:          func() { requireSchemaMode(t) },
 		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{

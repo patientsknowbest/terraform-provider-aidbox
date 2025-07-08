@@ -53,13 +53,22 @@ Trial license can be obtained either
 - we can also issue our own development licenses from now on, ask around for these, or try accessing the [user portal](https://aidbox.app/ui/portal#/project/f07750f6-28e3-44be-a8f8-c2004ef2b1ea/license)
 
 ```sh
-$ (cd scripts && AIDBOX_LICENSE=<your-aidbox-license> docker-compose up -d)
-$ make testacc
+(cd scripts && AIDBOX_LICENSE=<your-aidbox-license> docker-compose up -d)
+make testacc
 ```
 
 Erase the test cache in case you don't have code changes but still want to run the tests from scratch
 (e.g. you only have environmental changes, like updating the docker image):
 `go clean -testcache`
+
+## Testing the provider with legacy modes of operation
+
+In case you want to test functionality that predates schema mode and is not compatible with it, use the compose
+file docker-compose-legacy.yaml
+```shell
+docker compose -f scripts/docker-compose.yaml up
+TF_ACC_AIDBOX_MODE=legacy make testacc
+```
 
 ## Trying out the provider without releasing
 

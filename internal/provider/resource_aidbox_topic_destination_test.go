@@ -7,7 +7,7 @@ import (
 
 func TestAccAidboxTopicDestinaton_subscribeToPatientEvents(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck:          func() { requireSchemaMode(t) },
 		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
