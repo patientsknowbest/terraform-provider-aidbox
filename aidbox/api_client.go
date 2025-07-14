@@ -46,7 +46,7 @@ func (apiClient *ApiClient) getResource(ctx context.Context, id string, response
 }
 
 func (apiClient *ApiClient) updateResource(ctx context.Context, resource Resource, responseTarget any) error {
-	return apiClient.put(ctx, resource, path.Join("/", resource.GetResourcePath()), responseTarget)
+	return apiClient.put(ctx, resource, path.Join("/", resource.GetResourcePath(), "/", resource.GetID()), responseTarget)
 }
 
 func (apiClient *ApiClient) deleteResource(ctx context.Context, id string, responseTarget Resource) error {

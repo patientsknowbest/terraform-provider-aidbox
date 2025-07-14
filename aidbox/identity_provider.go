@@ -24,7 +24,7 @@ type IdentityProvider struct {
 }
 
 func (g *IdentityProvider) GetResourcePath() string {
-	return "IdentityProvider/" + g.ID
+	return "IdentityProvider"
 }
 
 type IdentityProviderUserinfoSource int
