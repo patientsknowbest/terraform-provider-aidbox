@@ -11,6 +11,7 @@ services:
   devbox:
     depends_on:
       - database-devbox
+    # going higher than this version will not create any database tables for FHIR resources - legacy mode is not supported since 2507 release
     image: "healthsamurai/aidboxone:2506"
     ports:
       - "8888:8888"

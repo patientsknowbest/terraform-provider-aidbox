@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
@@ -61,6 +62,7 @@ func New(apiClient *aidbox.ApiClient) func() *schema.Provider {
 				"aidbox_aidbox_subscription_topic": resourceAidboxSubscriptionTopic(),
 				"aidbox_aidbox_topic_destination":  resourceAidboxTopicDestination(),
 				"aidbox_identity_provider":         resourceIdentityProvider(),
+				"aidbox_structure_definition":      resourceStructureDefinition(),
 			},
 		}
 

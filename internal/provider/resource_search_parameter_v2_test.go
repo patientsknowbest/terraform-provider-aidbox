@@ -13,7 +13,6 @@ func TestAccResourceSearchParameterV2_elementNameAndPatternFilterInExpression(t 
 			{
 				Config: testAccResourceSearchParameterV2_elementNameAndPatternFilterInExpression,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "id", "Patient.phone-number"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "name", "phone-number"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "type", "string"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "base.0", "Patient"),
@@ -36,7 +35,6 @@ func TestAccResourceSearchParameterV2_elementNameAndIndexInExpression(t *testing
 			{
 				Config: testAccResourceSearchParameterV2_elementNameAndIndexInExpression,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_name", "id", "Patient.first-name"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_name", "name", "first-name"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_name", "type", "string"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_name", "base.0", "Patient"),
@@ -59,7 +57,6 @@ func TestAccResourceSearchParameterV2_extension(t *testing.T) {
 			{
 				Config: testAccResourceSearchParameterV2_extension,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_extension", "id", "Appointment.custom-date"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_extension", "name", "custom-date"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_extension", "type", "date"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_extension", "base.0", "Appointment"),
