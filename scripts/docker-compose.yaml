@@ -11,7 +11,7 @@ services:
   devbox:
     depends_on:
       - database-devbox
-    image: "healthsamurai/aidboxone:2506"
+    image: "healthsamurai/aidboxone:2507"
     ports:
       - "8888:8888"
     environment:
