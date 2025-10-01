@@ -11,7 +11,7 @@ services:
   devbox:
     depends_on:
       - database-devbox
-    image: "healthsamurai/aidboxone:2507"
+    image: "healthsamurai/aidboxone@sha256:ba99f11fadec5da1e4a69ee51845b22a5392793d67c1bee19078a837512ee6bd" # :edge, Sep 30, 2025 at 11:57 am
     ports:
       - "8888:8888"
     environment:
@@ -22,7 +22,7 @@ services:
       AIDBOX_ADMIN_ID: "admin"
       AIDBOX_ADMIN_PASSWORD: "secret"
       AIDBOX_PORT: "8888"
-      AIDBOX_FHIR_PACKAGES: hl7.fhir.r4.core#4.0.1
+      AIDBOX_FHIR_PACKAGES: hl7.fhir.r3.core#3.0.2
       AIDBOX_FHIR_SCHEMA_VALIDATION: true
       AIDBOX_CREATED_AT_URL: https://aidbox.app/ex/createdAt
       PGUSER: aidbox
