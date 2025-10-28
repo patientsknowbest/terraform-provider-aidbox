@@ -63,6 +63,8 @@ func New(apiClient *aidbox.ApiClient) func() *schema.Provider {
 				"aidbox_aidbox_topic_destination":  resourceAidboxTopicDestination(),
 				"aidbox_identity_provider":         resourceIdentityProvider(),
 				"aidbox_structure_definition":      resourceStructureDefinition(),
+				"aidbox_sdc_config":                resourceSDCConfig(),
+				"aidbox_gcp_service_account":       resourceGcpServiceAccount(),
 			},
 		}
 
