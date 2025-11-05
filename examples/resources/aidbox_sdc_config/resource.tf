@@ -1,4 +1,4 @@
-resource "aidbox_sdcconfig" "default_storage_config" {
+resource "aidbox_sdc_config" "default_storage_config" {
   name    = "forms-storage"
   default = true
 

@@ -2,27 +2,22 @@ package aidbox
 
 import (
 	"context"
+	"encoding/json"
 )
 
 // SDCConfig is not an official FHIR resource.
 // It is a proprietary custom resource used specifically by Aidbox to configure its Structured Data Capture (SDC) module
-// We need to implement it so we can support file storage from Aidbox in GCP storages
 type SDCConfig struct {
 	ResourceBase
-	ResourceType string      `json:"resourceType,omitempty"`
-	Name         string      `json:"name,omitempty"`
-	Description  string      `json:"description,omitempty"`
-	Default      bool        `json:"default,omitempty"`
-	Storage      *SDCStorage `json:"storage,omitempty"`
-}
-
-type SDCStorage struct {
-	Bucket  string      `json:"bucket,omitempty"`
-	Account *SDCAccount `json:"account,omitempty"`
-}
-
-type SDCAccount struct {
-	Reference string `json:"reference,omitempty"`
+	ResourceType string `json:"resourceType,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Description  string `json:"description,omitempty"`
+	Default      bool   `json:"default,omitempty"`
+	// Deliberately not doing more validation than "is json?" or adding a custom type as it's unnecessarily complex
+	// to handle Element given the intention here is temporary and partial support. This leaves more chance for user
+	// error, however we will print the details about any issues related to this property received from the server, so
+	// the user can correct it anyway
+	Storage *json.RawMessage `json:"storage"`
 }
 
 func (*SDCConfig) GetResourcePath() string {

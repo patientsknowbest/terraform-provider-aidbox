@@ -11,9 +11,9 @@ import (
 func resourceGcpServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Aidbox GcpServiceAccount is a proprietary custom resource used to store Google Cloud Platform service account credentials for workload identity.",
-		CreateContext: resourceGcpServiceAccountCreateOrUpdate,
+		CreateContext: resourceGcpServiceAccountCreate,
 		ReadContext:   resourceGcpServiceAccountRead,
-		UpdateContext: resourceGcpServiceAccountCreateOrUpdate,
+		UpdateContext: resourceGcpServiceAccountUpdate,
 		DeleteContext: resourceGcpServiceAccountDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceGcpServiceAccountImport,
@@ -56,24 +56,22 @@ func mapGcpServiceAccountToData(res *aidbox.GcpServiceAccount, data *schema.Reso
 	return nil
 }
 
-func resourceGcpServiceAccountCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGcpServiceAccountCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
 	q, err := mapGcpServiceAccountFromData(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	ac, err := apiClient.UpdateGcpServiceAccount(ctx, q)
+	res, err := apiClient.CreateGcpServiceAccount(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	err = mapGcpServiceAccountToData(ac, d)
+	err = mapGcpServiceAccountToData(res, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	return resourceGcpServiceAccountRead(ctx, d, meta)
+	return nil
 }
 
 func resourceGcpServiceAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -92,9 +90,26 @@ func resourceGcpServiceAccountRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
+func resourceGcpServiceAccountUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	apiClient := meta.(*aidbox.ApiClient)
+	q, err := mapGcpServiceAccountFromData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	ac, err := apiClient.UpdateGcpServiceAccount(ctx, q)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = mapGcpServiceAccountToData(ac, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
 func resourceGcpServiceAccountDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	apiClient := meta.(*aidbox.ApiClient)
-	err := apiClient.DeleteSDCConfig(ctx, d.Id())
+	err := apiClient.DeleteGcpServiceAccount(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

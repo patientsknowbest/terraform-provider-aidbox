@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,34 +42,11 @@ func resourceSchemaSDCConfig() map[string]*schema.Schema {
 			Optional:    true,
 		},
 		"storage": {
-			Description: "Configuration for storing attachments.",
-			Type:        schema.TypeList,
-			Optional:    true,
-			MaxItems:    1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"bucket": {
-						Description: "The name of the bucket to store attachment files in.",
-						Type:        schema.TypeString,
-						Required:    true,
-					},
-					"account": {
-						Description: "A reference to the storage account resource.",
-						Type:        schema.TypeList,
-						Required:    true,
-						MaxItems:    1,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"reference": {
-									Description: "The reference to the storage account (e.g. \"GcpServiceAccount/aidbox-rc\").",
-									Type:        schema.TypeString,
-									Required:    true,
-								},
-							},
-						},
-					},
-				},
-			},
+			Description:           "Configuration for storing attachments, as a raw JSON string.",
+			Type:                  schema.TypeString,
+			Optional:              true,
+			DiffSuppressOnRefresh: true,
+			DiffSuppressFunc:      jsonDiffSuppressFunc,
 		},
 	}
 }
@@ -84,27 +63,16 @@ func mapSDCConfigFromData(data *schema.ResourceData) (*aidbox.SDCConfig, error) 
 		res.Default = v.(bool)
 	}
 
+	// just parse as an "any json" value without validation
 	if v, ok := data.GetOk("storage"); ok {
-		storageList := v.([]interface{})
-		if len(storageList) > 0 && storageList[0] != nil {
-			storageData := storageList[0].(map[string]interface{})
-			res.Storage = &aidbox.SDCStorage{}
-
-			if bucket, ok := storageData["bucket"]; ok {
-				res.Storage.Bucket = bucket.(string)
+		rawStorage := v.(string)
+		if rawStorage != "" {
+			storage := &json.RawMessage{}
+			err := json.Unmarshal([]byte(rawStorage), storage)
+			if err != nil {
+				return nil, err
 			}
-
-			if a, ok := storageData["account"]; ok {
-				accountList := a.([]interface{})
-				if len(accountList) > 0 && accountList[0] != nil {
-					accountData := accountList[0].(map[string]interface{})
-					res.Storage.Account = &aidbox.SDCAccount{}
-
-					if ref, ok := accountData["reference"]; ok {
-						res.Storage.Account.Reference = ref.(string)
-					}
-				}
-			}
+			res.Storage = storage
 		}
 	}
 
@@ -118,20 +86,13 @@ func mapSDCConfigToData(res *aidbox.SDCConfig, data *schema.ResourceData) error 
 	data.Set("default", res.Default)
 
 	if res.Storage != nil {
-		storageData := make(map[string]interface{})
-		storageData["bucket"] = res.Storage.Bucket
-
-		if res.Storage.Account != nil {
-			accountData := make(map[string]interface{})
-			accountData["reference"] = res.Storage.Account.Reference
-			storageData["account"] = []interface{}{accountData}
-		} else {
-			storageData["account"] = []interface{}{}
+		storage, err := json.Marshal(res.Storage)
+		if err != nil {
+			return err
 		}
-
-		data.Set("storage", []interface{}{storageData})
+		data.Set("storage", string(storage))
 	} else {
-		data.Set("storage", []interface{}{})
+		data.Set("storage", "")
 	}
 
 	return nil
@@ -176,6 +137,8 @@ func resourceSDCConfigUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	q.ID = d.Id()
+
 	ac, err := apiClient.UpdateSDCConfig(ctx, q)
 	if err != nil {
 		return diag.FromErr(err)
@@ -207,4 +170,22 @@ func resourceSDCConfigImport(ctx context.Context, d *schema.ResourceData, meta i
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
+}
+
+func jsonDiffSuppressFunc(_ string, oldJson string, newJson string, _ *schema.ResourceData) bool {
+	if oldJson == "" && newJson != "" {
+		return false
+	}
+
+	var oldObject interface{}
+	err := json.Unmarshal([]byte(oldJson), &oldObject)
+	if err != nil {
+		panic(err)
+	}
+	var newObject interface{}
+	err = json.Unmarshal([]byte(newJson), &newObject)
+	if err != nil {
+		panic(err)
+	}
+	return reflect.DeepEqual(oldObject, newObject)
 }

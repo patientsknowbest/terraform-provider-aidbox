@@ -3,8 +3,6 @@ package provider
 import (
 	"context"
 	"encoding/json"
-	"reflect"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
@@ -76,7 +74,7 @@ func resourceSchemaStructureDefinition() map[string]*schema.Schema {
 			Type:                  schema.TypeString,
 			Required:              true,
 			DiffSuppressOnRefresh: true,
-			DiffSuppressFunc:      structureDefinitionDiffSuppressFunc,
+			DiffSuppressFunc:      jsonDiffSuppressFunc,
 		},
 	}
 }
@@ -198,22 +196,4 @@ func resourceStructureDefinitionImport(ctx context.Context, d *schema.ResourceDa
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
-}
-
-func structureDefinitionDiffSuppressFunc(_ string, oldJson string, newJson string, _ *schema.ResourceData) bool {
-	if oldJson == "" && newJson != "" {
-		return false
-	}
-
-	var oldObject interface{}
-	err := json.Unmarshal([]byte(oldJson), &oldObject)
-	if err != nil {
-		panic(err)
-	}
-	var newObject interface{}
-	err = json.Unmarshal([]byte(newJson), &newObject)
-	if err != nil {
-		panic(err)
-	}
-	return reflect.DeepEqual(oldObject, newObject)
 }

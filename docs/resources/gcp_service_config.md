@@ -9,7 +9,7 @@ description: |-
 # aidbox_gcp_service_account (Resource)
 The `GcpServiceAccount` resource is a proprietary, custom resource used by Aidbox. It stores the email address of a Google Cloud Platform service account, allowing Aidbox to impersonate that account using workload identity.
 
-This resource is most commonly referenced by other resources, such as `aidbox_sdcconfig`, to grant Aidbox access to GCP services like Google Cloud Storage buckets.
+This resource is most commonly referenced by other resources, such as `aidbox_sdc_config`, to grant Aidbox access to GCP services like Google Cloud Storage buckets.
 
 ## Example Usage
 
@@ -30,7 +30,7 @@ resource "aidbox_gcp_service_account" "sa_account" {
   service_account_email = "sa-email@my-project.iam.gserviceaccount.com"
 }
 
-resource "aidbox_sdcconfig" "default_storage_config" {
+resource "aidbox_sdc_config" "default_storage_config" {
   name    = "forms-storage"
   default = true
 
