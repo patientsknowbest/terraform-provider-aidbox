@@ -25,7 +25,7 @@ func resourceGcpServiceAccount() *schema.Resource {
 func resourceSchemaGcpServiceAccount() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Description: "Computer friendly name of the GCP Service Account.",
+			Description: "Computer friendly name of the GCP Service Account. This must be unique as it is used as the resource's identifier.",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
@@ -40,6 +40,9 @@ func resourceSchemaGcpServiceAccount() map[string]*schema.Schema {
 func mapGcpServiceAccountFromData(data *schema.ResourceData) (*aidbox.GcpServiceAccount, error) {
 	res := &aidbox.GcpServiceAccount{}
 	res.ResourceType = "GcpServiceAccount"
+	// Deliberately use the 'name' field from the Terraform config
+	// as the resource 'ID' because 'GcpServiceAccount' is identified
+	// by its name in Aidbox (not a server-generated UUID).
 	res.ID = data.Get("name").(string)
 
 	if v, ok := data.GetOk("service_account_email"); ok {
@@ -51,6 +54,9 @@ func mapGcpServiceAccountFromData(data *schema.ResourceData) (*aidbox.GcpService
 
 func mapGcpServiceAccountToData(res *aidbox.GcpServiceAccount, data *schema.ResourceData) error {
 	data.SetId(res.ID)
+	// Deliberately use the 'name' field from the Terraform config
+	// as the resource 'ID' because 'GcpServiceAccount' is identified
+	// by its name in Aidbox (not a server-generated UUID).
 	data.Set("name", res.ID)
 	data.Set("service_account_email", res.ServiceAccountEmail)
 	return nil

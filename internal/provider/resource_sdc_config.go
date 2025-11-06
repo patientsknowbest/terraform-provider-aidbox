@@ -3,8 +3,6 @@ package provider
 import (
 	"context"
 	"encoding/json"
-	"reflect"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
@@ -55,7 +53,7 @@ func mapSDCConfigFromData(data *schema.ResourceData) (*aidbox.SDCConfig, error) 
 	res := &aidbox.SDCConfig{}
 	res.ResourceType = "SDCConfig"
 	res.Name = data.Get("name").(string)
-
+	res.ID = data.Id()
 	if v, ok := data.GetOk("description"); ok {
 		res.Description = v.(string)
 	}
@@ -137,7 +135,6 @@ func resourceSDCConfigUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	q.ID = d.Id()
 
 	ac, err := apiClient.UpdateSDCConfig(ctx, q)
 	if err != nil {
@@ -170,22 +167,4 @@ func resourceSDCConfigImport(ctx context.Context, d *schema.ResourceData, meta i
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
-}
-
-func jsonDiffSuppressFunc(_ string, oldJson string, newJson string, _ *schema.ResourceData) bool {
-	if oldJson == "" && newJson != "" {
-		return false
-	}
-
-	var oldObject interface{}
-	err := json.Unmarshal([]byte(oldJson), &oldObject)
-	if err != nil {
-		panic(err)
-	}
-	var newObject interface{}
-	err = json.Unmarshal([]byte(newJson), &newObject)
-	if err != nil {
-		panic(err)
-	}
-	return reflect.DeepEqual(oldObject, newObject)
 }
