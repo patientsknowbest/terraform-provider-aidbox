@@ -19,6 +19,7 @@ This resource is most commonly referenced by other resources, such as `aidbox_sd
 resource "aidbox_gcp_service_account" "sa_account" {
   name                      = "aidbox-sa"
   service_account_email = "sa-email@my-project.iam.gserviceaccount.com"
+  private_key       = "-----BEGIN PRIVATE KEY-----....-----END PRIVATE KEY-----""
 }
 ```
 
@@ -28,6 +29,7 @@ resource "aidbox_gcp_service_account" "sa_account" {
 resource "aidbox_gcp_service_account" "sa_account" {
   name                      = "aidbox-sa"
   service_account_email = "sa-email@my-project.iam.gserviceaccount.com"
+  private_key   = "-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----""
 }
 
 resource "aidbox_sdc_config" "default_storage_config" {
@@ -47,6 +49,7 @@ resource "aidbox_sdc_config" "default_storage_config" {
 ### Required
 - `name` (String) Computer friendly name of the resource
 - `service_account_email` (String) The email address of the GCP service account.
+- `private_key` (String) Private key of the GCP service account.
 
 ### Read-Only
 - `id` (String) The ID of this resource.

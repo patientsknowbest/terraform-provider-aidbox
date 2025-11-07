@@ -52,6 +52,7 @@ const testAccResourceSDCConfig_Create = `
 resource "aidbox_gcp_service_account" "test_account" {
   name       = "aidbox-test-for-sdc"
   service_account_email = "test-sa-email@example.com"
+  private_key = "test-key"
 }
 
 resource "aidbox_sdc_config" "default_storage" {
@@ -82,6 +83,7 @@ const testAccResourceSDCConfig_Update = `
 resource "aidbox_gcp_service_account" "test_account" {
   name       = "aidbox-test-for-sdc"
   service_account_email = "test-sa-email@example.com"
+  private_key = "test-key"
 }
 
 resource "aidbox_sdc_config" "default_storage" {
@@ -96,5 +98,72 @@ resource "aidbox_sdc_config" "default_storage" {
     }
   }
   EOT
+}
+`
+
+// Test configuration using workload identity
+
+func TestAccResourceSDCConfig_WorkloadIdentity(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { requireSchemaMode(t) },
+		ProviderFactories: testProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceSDCConfig_Workload_Create,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_sdc_config.workload_storage", "name", "forms-storage-workload"),
+					resource.TestCheckResourceAttr("aidbox_sdc_config.workload_storage", "default", "true"),
+					resource.TestCheckResourceAttrWith("aidbox_sdc_config.workload_storage", "storage", func(valueFromServer string) error {
+						assert.True(t, jsonDiffSuppressFunc("", storage_workload_v1, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						return nil
+					}),
+				),
+			},
+			{
+				Config: testAccResourceSDCConfig_Workload_Update,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_sdc_config.workload_storage", "name", "forms-storage-workload"),
+					resource.TestCheckResourceAttr("aidbox_sdc_config.workload_storage", "default", "true"),
+					resource.TestCheckResourceAttrWith("aidbox_sdc_config.workload_storage", "storage", func(valueFromServer string) error {
+						assert.True(t, jsonDiffSuppressFunc("", storage_workload_v2, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						return nil
+					}),
+				),
+			},
+		},
+	})
+}
+
+const storage_workload_v1 = `
+{
+  "bucket": "attachment-store-workload"
+}
+`
+
+const testAccResourceSDCConfig_Workload_Create = `
+resource "aidbox_sdc_config" "workload_storage" {
+  name        = "forms-storage-workload"
+  default     = true
+  description = "Workload Identity SDC config" 
+  storage     = jsonencode({
+    bucket = "attachment-store-workload"
+  })
+}
+`
+
+const storage_workload_v2 = `
+{
+  "bucket": "attachment-store-workload-UPDATED"
+}
+`
+
+const testAccResourceSDCConfig_Workload_Update = `
+resource "aidbox_sdc_config" "workload_storage" {
+  name        = "forms-storage-workload"
+  default     = true 
+  description = "Workload Identity SDC config"
+  storage     = jsonencode({
+    bucket = "attachment-store-workload-UPDATED"
+  })
 }
 `

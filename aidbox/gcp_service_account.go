@@ -12,6 +12,7 @@ type GcpServiceAccount struct {
 	ResourceBase
 	ResourceType        string `json:"resourceType,omitempty"`
 	ServiceAccountEmail string `json:"service-account-email,omitempty"`
+	GcloudKey           string `json:"private-key,omitempty"`
 }
 
 func (*GcpServiceAccount) GetResourcePath() string {
