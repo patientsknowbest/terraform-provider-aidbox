@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
@@ -81,6 +82,7 @@ func resourceSchemaStructureDefinition() map[string]*schema.Schema {
 
 func mapStructureDefinitionFromData(data *schema.ResourceData) (*aidbox.StructureDefinition, error) {
 	res := &aidbox.StructureDefinition{}
+	res.ID = data.Id()
 	res.ResourceType = "StructureDefinition"
 	res.Name = data.Get("name").(string)
 	res.Url = data.Get("url").(string)

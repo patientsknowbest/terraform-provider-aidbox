@@ -108,7 +108,8 @@ func (t *SearchParameterTypeV2) UnmarshalJSON(b []byte) error {
 
 func (apiClient *ApiClient) CreateSearchParameterV2(ctx context.Context, searchParameter *SearchParameterV2) (*SearchParameterV2, error) {
 	response := &SearchParameterV2{}
-	return response, apiClient.createResource(ctx, searchParameter, response)
+	// use PUT to create instead of POST. Aidbox ignores the id in the request body otherwise for this resource
+	return response, apiClient.updateResource(ctx, searchParameter, response)
 }
 
 func (apiClient *ApiClient) GetSearchParameterV2(ctx context.Context, id string) (*SearchParameterV2, error) {

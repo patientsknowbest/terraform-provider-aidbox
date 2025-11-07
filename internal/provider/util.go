@@ -2,10 +2,11 @@ package provider
 
 import (
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 	"log"
 	"reflect"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 )
 
 func handleNotFoundError(err error, data *schema.ResourceData) bool {
@@ -19,6 +20,9 @@ func handleNotFoundError(err error, data *schema.ResourceData) bool {
 
 func jsonDiffSuppressFunc(_ string, oldJson string, newJson string, _ *schema.ResourceData) bool {
 	if oldJson == "" && newJson != "" {
+		return false
+	}
+	if oldJson != "" && newJson == "" {
 		return false
 	}
 

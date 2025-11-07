@@ -2,12 +2,13 @@ package provider
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 )
 
 func resourceSearchParameter() *schema.Resource {

@@ -61,7 +61,9 @@ Erase the test cache in case you don't have code changes but still want to run t
 (e.g. you only have environmental changes, like updating the docker image):
 `go clean -testcache`
 
-## Testing the provider with legacy modes of operation
+## Testing the provider
+
+### Testing the provider with legacy modes of operation
 
 In case you want to test functionality that predates schema mode and is not compatible with it, use the compose
 file docker-compose-legacy.yaml
@@ -70,7 +72,13 @@ docker compose -f scripts/docker-compose.yaml up
 TF_ACC_AIDBOX_MODE=legacy make testacc
 ```
 
-## Trying out the provider without releasing
+### Testing the provider with observing HTTP requests
+
+Often you can get yourself into states you don't understand how you go into. To validate what's exactly happening
+under the hood to validate your assumptions the HTTP requests-responses the provider code and terraform's test
+framework is making can be dumped if the env `TF_ACC_DUMP_HTTP` is set to any value
+
+### Trying out the provider without releasing
 
 Once the provider is in a suitable state, further to the above testing you can try it out by pointing terraform to look
 for your build of the provider and use that instead of a released version. Put this in a CLI configuration file (e.g.

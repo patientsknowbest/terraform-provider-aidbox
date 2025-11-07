@@ -1,9 +1,11 @@
 package provider
 
 import (
-	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
+	"net/http"
 	"os"
 	"testing"
+
+	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,6 +34,11 @@ func init() {
 		"aidbox": func() (*schema.Provider, error) {
 			return testProvider, nil
 		},
+	}
+	_, dumpHttp := os.LookupEnv("TF_ACC_DUMP_HTTP")
+	if dumpHttp {
+		// Log the request-response pairs to see exactly what our tests are doing
+		http.DefaultClient.Transport = LoggingRoundTripper{Proxied: http.DefaultTransport}
 	}
 }
 

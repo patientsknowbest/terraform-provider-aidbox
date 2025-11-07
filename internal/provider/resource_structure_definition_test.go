@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { requireSchemaMode(t) },
 		ProviderFactories: testProviderFactories,
@@ -28,6 +29,10 @@ func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.
 						assert.True(t, jsonDiffSuppressFunc("", differential, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
 						return nil
 					}),
+					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
 				),
 			},
 			{
@@ -44,6 +49,10 @@ func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "version", "0.0.1"),
 					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "differential", func(valueFromServer string) error {
 						assert.True(t, jsonDiffSuppressFunc("", differential_updated, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						return nil
+					}),
+					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "id", func(id string) error {
+						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
 						return nil
 					}),
 				),

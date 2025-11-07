@@ -4,9 +4,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccResourceIdentityProvider(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
@@ -20,6 +22,10 @@ func TestAccResourceIdentityProvider(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "client.0.secret", "some_client_secret"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "scopes.0", "https://www.myidp.com/scope1"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "scopes.1", "https://www.myidp.com/scope2"),
+					resource.TestCheckResourceAttrWith("aidbox_identity_provider.myidp", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
 				),
 			},
 			{
@@ -31,6 +37,10 @@ func TestAccResourceIdentityProvider(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "client.0.secret", "some_client_secret_updated"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "scopes.0", "https://www.myidp.com/scope1"),
 					resource.TestCheckNoResourceAttr("aidbox_identity_provider.myidp", "scopes.1"),
+					resource.TestCheckResourceAttrWith("aidbox_identity_provider.myidp", "id", func(id string) error {
+						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
+						return nil
+					}),
 				),
 			},
 		},

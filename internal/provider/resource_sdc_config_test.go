@@ -1,12 +1,14 @@
 package provider
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestAccResourceSDCConfig_CreateAndUpdate(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { requireSchemaMode(t) },
 		ProviderFactories: testProviderFactories,
@@ -21,6 +23,10 @@ func TestAccResourceSDCConfig_CreateAndUpdate(t *testing.T) {
 						assert.True(t, jsonDiffSuppressFunc("", storage_v1, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
 						return nil
 					}),
+					resource.TestCheckResourceAttrWith("aidbox_sdc_config.default_storage", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
 				),
 			},
 			{
@@ -31,6 +37,10 @@ func TestAccResourceSDCConfig_CreateAndUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_sdc_config.default_storage", "description", "Updated SDC config"),
 					resource.TestCheckResourceAttrWith("aidbox_sdc_config.default_storage", "storage", func(valueFromServer string) error {
 						assert.True(t, jsonDiffSuppressFunc("", storage_v2, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						return nil
+					}),
+					resource.TestCheckResourceAttrWith("aidbox_sdc_config.default_storage", "id", func(id string) error {
+						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
 						return nil
 					}),
 				),
