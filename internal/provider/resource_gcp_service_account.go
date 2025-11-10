@@ -1,0 +1,146 @@
+package provider
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
+)
+
+func resourceGcpServiceAccount() *schema.Resource {
+	return &schema.Resource{
+		Description:   "Aidbox GcpServiceAccount is a proprietary custom resource used to store Google Cloud Platform service account credentials for workload identity.",
+		CreateContext: resourceGcpServiceAccountCreate,
+		ReadContext:   resourceGcpServiceAccountRead,
+		UpdateContext: resourceGcpServiceAccountUpdate,
+		DeleteContext: resourceGcpServiceAccountDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceGcpServiceAccountImport,
+		},
+		Schema: resourceFullSchema(resourceSchemaGcpServiceAccount()),
+	}
+}
+
+func resourceSchemaGcpServiceAccount() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"name": {
+			Description: "Computer friendly name of the GCP Service Account. This must be unique as it is used as the resource's identifier.",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
+		"service_account_email": {
+			Description: "The email address of the GCP service account.",
+			Type:        schema.TypeString,
+			Required:    true,
+		},
+		"private_key": {
+			Description: "The private key of the GCP service account.",
+			Type:        schema.TypeString,
+			Sensitive:   true,
+			Required:    true,
+		},
+	}
+}
+
+func mapGcpServiceAccountFromData(data *schema.ResourceData) (*aidbox.GcpServiceAccount, error) {
+	res := &aidbox.GcpServiceAccount{}
+	res.ResourceType = "GcpServiceAccount"
+	// Deliberately use the 'name' field from the Terraform config
+	// as the resource 'ID' because 'GcpServiceAccount' is identified
+	// by its name in Aidbox (not a server-generated UUID).
+	res.ID = data.Get("name").(string)
+
+	if v, ok := data.GetOk("service_account_email"); ok {
+		res.ServiceAccountEmail = v.(string)
+	}
+	if v, ok := data.GetOk("private_key"); ok {
+		res.GcloudKey = v.(string)
+	}
+
+	return res, nil
+}
+
+func mapGcpServiceAccountToData(res *aidbox.GcpServiceAccount, data *schema.ResourceData) error {
+	data.SetId(res.ID)
+	// Deliberately use the 'name' field from the Terraform config
+	// as the resource 'ID' because 'GcpServiceAccount' is identified
+	// by its name in Aidbox (not a server-generated UUID).
+	data.Set("name", res.ID)
+	data.Set("service_account_email", res.ServiceAccountEmail)
+	data.Set("private_key", res.GcloudKey)
+	return nil
+}
+
+func resourceGcpServiceAccountCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	apiClient := meta.(*aidbox.ApiClient)
+	q, err := mapGcpServiceAccountFromData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	res, err := apiClient.CreateGcpServiceAccount(ctx, q)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = mapGcpServiceAccountToData(res, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func resourceGcpServiceAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetGcpServiceAccount(ctx, d.Id())
+	if err != nil {
+		if handleNotFoundError(err, d) {
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+	err = mapGcpServiceAccountToData(res, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func resourceGcpServiceAccountUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	apiClient := meta.(*aidbox.ApiClient)
+	q, err := mapGcpServiceAccountFromData(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	ac, err := apiClient.UpdateGcpServiceAccount(ctx, q)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = mapGcpServiceAccountToData(ac, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func resourceGcpServiceAccountDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	apiClient := meta.(*aidbox.ApiClient)
+	err := apiClient.DeleteGcpServiceAccount(ctx, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func resourceGcpServiceAccountImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetGcpServiceAccount(ctx, d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = mapGcpServiceAccountToData(res, d)
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}

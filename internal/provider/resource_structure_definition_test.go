@@ -25,7 +25,7 @@ func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "kind", "resource"),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "version", "0.0.1"),
 					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "differential", func(valueFromServer string) error {
-						assert.True(t, structureDefinitionDiffSuppressFunc("", differential, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						assert.True(t, jsonDiffSuppressFunc("", differential, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
 						return nil
 					}),
 				),
@@ -43,7 +43,7 @@ func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "kind", "resource"),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "version", "0.0.1"),
 					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "differential", func(valueFromServer string) error {
-						assert.True(t, structureDefinitionDiffSuppressFunc("", differential_updated, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						assert.True(t, jsonDiffSuppressFunc("", differential_updated, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
 						return nil
 					}),
 				),
