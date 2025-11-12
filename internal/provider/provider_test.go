@@ -35,8 +35,7 @@ func init() {
 			return testProvider, nil
 		},
 	}
-	_, dumpHttp := os.LookupEnv("TF_ACC_DUMP_HTTP")
-	if dumpHttp {
+	if os.Getenv("TF_ACC_DUMP_HTTP") == "true" {
 		// Log the request-response pairs to see exactly what our tests are doing
 		http.DefaultClient.Transport = LoggingRoundTripper{Proxied: http.DefaultTransport}
 	}

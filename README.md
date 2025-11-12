@@ -55,6 +55,10 @@ Trial license can be obtained either
 ```sh
 (cd scripts && AIDBOX_LICENSE=<your-aidbox-license> docker-compose up -d)
 make testacc
+
+# if you have access to the pkb 1pw vault
+(cd scripts && AIDBOX_LICENSE=$(op read op://PHR-dev-e2e/aidbox-dev-license/license-key) docker-compose up -d)
+make testacc
 ```
 
 Erase the test cache in case you don't have code changes but still want to run the tests from scratch
@@ -76,7 +80,7 @@ TF_ACC_AIDBOX_MODE=legacy make testacc
 
 Often you can get yourself into states you don't understand how you go into. To validate what's exactly happening
 under the hood to validate your assumptions the HTTP requests-responses the provider code and terraform's test
-framework is making can be dumped if the env `TF_ACC_DUMP_HTTP` is set to any value
+framework is making can be dumped if the env `TF_ACC_DUMP_HTTP` is set to true
 
 ### Trying out the provider without releasing
 
