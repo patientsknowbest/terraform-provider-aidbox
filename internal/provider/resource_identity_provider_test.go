@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestAccResourceIdentityProvider(t *testing.T) {
@@ -31,16 +30,13 @@ func TestAccResourceIdentityProvider(t *testing.T) {
 			{
 				Config: testAccResourceIdentityProvider_updated,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_identity_provider.myidp", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "title", "MyIDP"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "userinfo_source", "userinfo-endpoint"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "client.0.id", "some_client_id"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "client.0.secret", "some_client_secret_updated"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "scopes.0", "https://www.myidp.com/scope1"),
 					resource.TestCheckNoResourceAttr("aidbox_identity_provider.myidp", "scopes.1"),
-					resource.TestCheckResourceAttrWith("aidbox_identity_provider.myidp", "id", func(id string) error {
-						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
-						return nil
-					}),
 				),
 			},
 		},

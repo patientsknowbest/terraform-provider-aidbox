@@ -32,15 +32,12 @@ func TestAccResourceSDCConfig_CreateAndUpdate(t *testing.T) {
 			{
 				Config: testAccResourceSDCConfig_Update,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_sdc_config.default_storage", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_sdc_config.default_storage", "name", "forms-storage"),
 					resource.TestCheckResourceAttr("aidbox_sdc_config.default_storage", "default", "false"),
 					resource.TestCheckResourceAttr("aidbox_sdc_config.default_storage", "description", "Updated SDC config"),
 					resource.TestCheckResourceAttrWith("aidbox_sdc_config.default_storage", "storage", func(valueFromServer string) error {
 						assert.True(t, jsonDiffSuppressFunc("", storage_v2, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
-						return nil
-					}),
-					resource.TestCheckResourceAttrWith("aidbox_sdc_config.default_storage", "id", func(id string) error {
-						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
 						return nil
 					}),
 				),

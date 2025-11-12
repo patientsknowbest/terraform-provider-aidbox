@@ -38,6 +38,7 @@ func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.
 			{
 				Config: testAccResourceStructureDefinition_updatePatientProfile,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_structure_definition.patient_profile", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "name", "patient-profile"),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "url", "https://fhir.yourcompany.com/structuredefinition/patient"),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "base_definition", "http://hl7.org/fhir/StructureDefinition/Patient"),
@@ -49,10 +50,6 @@ func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "version", "0.0.1"),
 					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "differential", func(valueFromServer string) error {
 						assert.True(t, jsonDiffSuppressFunc("", differential_updated, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
-						return nil
-					}),
-					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "id", func(id string) error {
-						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
 						return nil
 					}),
 				),

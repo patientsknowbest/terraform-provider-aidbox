@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestAccResourceTokenIntrospector_jwt(t *testing.T) {
@@ -45,13 +44,10 @@ func TestAccResourceTokenIntrospector_opaque(t *testing.T) {
 			{
 				Config: testAccResourceTokenIntrospector_opaque_updateAuthorization,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_token_introspector.example2", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "type", "opaque"),
 					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "introspection_endpoint.0.authorization", "Bearer theBear"),
 					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "introspection_endpoint.0.url", "https://example.com/auth"),
-					resource.TestCheckResourceAttrWith("aidbox_token_introspector.example2", "id", func(id string) error {
-						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
-						return nil
-					}),
 				),
 			},
 		},

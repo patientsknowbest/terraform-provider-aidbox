@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestAccResourceSearch_happyPath(t *testing.T) {
@@ -30,15 +29,12 @@ func TestAccResourceSearch_happyPath(t *testing.T) {
 			{
 				Config: testAccResourceSearch_happyPath_updateWhereClause,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_search.example_phone", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "name", "phone-number"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "module", "fhir-4.0.1"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "reference.0.resource_id", "Patient"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "reference.0.resource_type", "Entity"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "where", "phone-number = 00000000000"),
-					resource.TestCheckResourceAttrWith("aidbox_search.example_phone", "id", func(id string) error {
-						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
-						return nil
-					}),
 				),
 			},
 		},

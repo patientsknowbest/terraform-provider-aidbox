@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestAccResourceSearchParameterV2_elementNameAndPatternFilterInExpression(t *testing.T) {
@@ -99,6 +98,7 @@ func TestAccResourceSearchParameterV2_update(t *testing.T) {
 			{
 				Config: testAccResourceSearchParameterV2_updatePhoneNumber,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_fhir_search_parameter.example_phone", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "name", "phone-number"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "type", "string"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "base.0", "Patient"),
@@ -107,10 +107,6 @@ func TestAccResourceSearchParameterV2_update(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "description", "Search patients by phone number"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "url", "https://fhir.newdomain.com/searchparameter/phone-number"),
 					resource.TestCheckResourceAttr("aidbox_fhir_search_parameter.example_phone", "status", "active"),
-					resource.TestCheckResourceAttrWith("aidbox_fhir_search_parameter.example_phone", "id", func(id string) error {
-						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
-						return nil
-					}),
 				),
 			},
 		},

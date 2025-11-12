@@ -59,12 +59,9 @@ func TestAccResourceAccessPolicy_schema_updated(t *testing.T) {
 			{
 				Config: testAccResourceAccessPolicy_schema_updated,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_access_policy.example", "id", &previousIdState),
 					resource.TestCheckResourceAttrWith("aidbox_access_policy.example", "schema", func(valueFromServer string) error {
 						assert.True(t, jsonDiffSuppressFunc("", schema_v2, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
-						return nil
-					}),
-					resource.TestCheckResourceAttrWith("aidbox_access_policy.example", "id", func(id string) error {
-						assert.Equalf(t, previousIdState, id, "Resource logical id unexpectedly changed after resource update")
 						return nil
 					}),
 				),
