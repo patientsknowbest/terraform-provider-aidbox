@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -137,28 +136,10 @@ func resourceSchemaAccessPolicy() map[string]*schema.Schema {
 			Required:    true,
 		},
 		"schema": {
-			Description: "JSON-schema policy to be evaluated. Used only if engine is json-schema",
-			Type:        schema.TypeString,
-			Optional:    true,
-			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-				// Need to handle empty strings explicitly
-				if old == "" && new != "" {
-					return false
-				}
-				if old != "" && new == "" {
-					return false
-				}
-				var oldM, newM map[string]interface{}
-				err := json.Unmarshal([]byte(old), &oldM)
-				if err != nil {
-					panic(err)
-				}
-				err = json.Unmarshal([]byte(new), &newM)
-				if err != nil {
-					panic(err)
-				}
-				return reflect.DeepEqual(oldM, newM)
-			},
+			Description:      "JSON-schema policy to be evaluated. Used only if engine is json-schema",
+			Type:             schema.TypeString,
+			Optional:         true,
+			DiffSuppressFunc: jsonDiffSuppressFunc,
 		},
 		"link": {
 			Description: "The actor to allow access. Used only if engine is allow.",

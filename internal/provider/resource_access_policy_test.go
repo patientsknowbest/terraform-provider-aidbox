@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccResourceAccessPolicy_schema(t *testing.T) {
@@ -37,6 +38,7 @@ func TestAccResourceAccessPolicy_allow(t *testing.T) {
 }
 
 func TestAccResourceAccessPolicy_schema_updated(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
@@ -44,13 +46,24 @@ func TestAccResourceAccessPolicy_schema_updated(t *testing.T) {
 			{
 				Config: testAccResourceAccessPolicy_schema,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aidbox_access_policy.example", "schema", "{\"required\":[\"client\",\"uri\",\"request-method\"],\"properties\":{\"uri\":{\"type\":\"string\",\"pattern\":\"^/fhir/.*\"},\"client\":{\"required\":[\"id\"],\"properties\":{\"id\":{\"const\":\"postman\"}}},\"request-method\":{\"const\":\"get\"}}}"),
+					resource.TestCheckResourceAttrWith("aidbox_access_policy.example", "schema", func(valueFromServer string) error {
+						assert.True(t, jsonDiffSuppressFunc("", schema_v1, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						return nil
+					}),
+					resource.TestCheckResourceAttrWith("aidbox_access_policy.example", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
 				),
 			},
 			{
 				Config: testAccResourceAccessPolicy_schema_updated,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aidbox_access_policy.example", "schema", "{\"required\":[\"client\",\"uri\",\"request-method\"],\"properties\":{\"uri\":{\"type\":\"string\",\"pattern\":\"^/(fhir|ValueSet)(/.*|$)\"},\"client\":{\"required\":[\"id\"],\"properties\":{\"id\":{\"const\":\"postman\"}}},\"request-method\":{\"const\":\"get\"}}}"),
+					resource.TestCheckResourceAttrPtr("aidbox_access_policy.example", "id", &previousIdState),
+					resource.TestCheckResourceAttrWith("aidbox_access_policy.example", "schema", func(valueFromServer string) error {
+						assert.True(t, jsonDiffSuppressFunc("", schema_v2, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
+						return nil
+					}),
 				),
 			},
 		},
@@ -61,67 +74,91 @@ const testAccResourceAccessPolicy_schema = `
 resource "aidbox_access_policy" "example" {
   description = "A policy to allow postman to access data"
   engine = "json-schema"
-  # The test complains about whitespace differences after application when using jsonencode. 
-  # For practical purposes, jsonencode is much easier to read, so you should use that.
-  schema = "{\"required\":[\"client\",\"uri\",\"request-method\"],\"properties\":{\"uri\":{\"type\":\"string\",\"pattern\":\"^/fhir/.*\"},\"client\":{\"required\":[\"id\"],\"properties\":{\"id\":{\"const\":\"postman\"}}},\"request-method\":{\"const\":\"get\"}}}"
-  #schema = jsonencode({
-  #  "required" = [
-  #    "client",
-  #    "uri",
-  #    "request-method" ]
-  #  "properties" = {
-  #    "uri" = {
-  #      "type" = "string"
-  #      "pattern" = "^/fhir/.*"
-  #    }
-  #    "client" = {
-  #      "required" = ["id"]
-  #      "properties" = {
-  #        "id" = {
-  #          const = "postman"
-  #        }
-  #      }
-  #    }
-  #    "request-method" = {
-  #      "const" = "get"
-  #    }
-  #  }
-  #})
+  schema = <<-EOT` + schema_v1 + `
+EOT
 }
 `
+
+const schema_v1 = `
+{
+    "properties":
+    {
+        "client":
+        {
+            "properties":
+            {
+                "id":
+                {
+                    "const": "postman"
+                }
+            },
+            "required":
+            [
+                "id"
+            ]
+        },
+        "request-method":
+        {
+            "const": "get"
+        },
+        "uri":
+        {
+            "pattern": "^/fhir/.*",
+            "type": "string"
+        }
+    },
+    "required":
+    [
+        "client",
+        "uri",
+        "request-method"
+    ]
+}`
 
 const testAccResourceAccessPolicy_schema_updated = `
 resource "aidbox_access_policy" "example" {
   description = "A policy to allow postman to access data"
   engine = "json-schema"
-  # The test complains about whitespace differences after application when using jsonencode. 
-  # For practical purposes, jsonencode is much easier to read, so you should use that.
-  schema = "{\"required\":[\"client\",\"uri\",\"request-method\"],\"properties\":{\"uri\":{\"type\":\"string\",\"pattern\":\"^/(fhir|ValueSet)(/.*|$)\"},\"client\":{\"required\":[\"id\"],\"properties\":{\"id\":{\"const\":\"postman\"}}},\"request-method\":{\"const\":\"get\"}}}"
-  #schema = jsonencode({
-  #  "required" = [
-  #    "client",
-  #    "uri",
-  #    "request-method" ]
-  #  "properties" = {
-  #    "uri" = {
-  #      "type" = "string"
-  #      "pattern" = "^/(fhir|ValueSet)(/.*|$)"
-  #    }
-  #    "client" = {
-  #      "required" = ["id"]
-  #      "properties" = {
-  #        "id" = {
-  #          const = "postman"
-  #        }
-  #      }
-  #    }
-  #    "request-method" = {
-  #      "const" = "get"
-  #    }
-  #  }
-  #})
+  schema = <<-EOT` + schema_v2 + `
+EOT
 }
 `
+
+const schema_v2 = `
+{
+    "properties":
+    {
+        "client":
+        {
+            "properties":
+            {
+                "id":
+                {
+                    "const": "postman"
+                }
+            },
+            "required":
+            [
+                "id"
+            ]
+        },
+        "request-method":
+        {
+            "const": "get"
+        },
+        "uri":
+        {
+            "pattern": "^/(fhir|ValueSet)(/.*|$)",
+            "type": "string"
+        }
+    },
+    "required":
+    [
+        "client",
+        "uri",
+        "request-method"
+    ]
+}`
 
 const testAccResourceAccessPolicy_allow = `
 resource "aidbox_client" "client" {

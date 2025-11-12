@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { requireSchemaMode(t) },
 		ProviderFactories: testProviderFactories,
@@ -28,11 +29,16 @@ func TestAccResourceStructureDefinition_setupAndUpdatePatientProfile(t *testing.
 						assert.True(t, jsonDiffSuppressFunc("", differential, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
 						return nil
 					}),
+					resource.TestCheckResourceAttrWith("aidbox_structure_definition.patient_profile", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
 				),
 			},
 			{
 				Config: testAccResourceStructureDefinition_updatePatientProfile,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_structure_definition.patient_profile", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "name", "patient-profile"),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "url", "https://fhir.yourcompany.com/structuredefinition/patient"),
 					resource.TestCheckResourceAttr("aidbox_structure_definition.patient_profile", "base_definition", "http://hl7.org/fhir/StructureDefinition/Patient"),

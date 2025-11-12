@@ -1,12 +1,14 @@
 package provider
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestAccResourceSDCConfig_CreateAndUpdate(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { requireSchemaMode(t) },
 		ProviderFactories: testProviderFactories,
@@ -21,11 +23,16 @@ func TestAccResourceSDCConfig_CreateAndUpdate(t *testing.T) {
 						assert.True(t, jsonDiffSuppressFunc("", storage_v1, valueFromServer, nil), "Value received from server does not match (semantically): %s", valueFromServer)
 						return nil
 					}),
+					resource.TestCheckResourceAttrWith("aidbox_sdc_config.default_storage", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
 				),
 			},
 			{
 				Config: testAccResourceSDCConfig_Update,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_sdc_config.default_storage", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_sdc_config.default_storage", "name", "forms-storage"),
 					resource.TestCheckResourceAttr("aidbox_sdc_config.default_storage", "default", "false"),
 					resource.TestCheckResourceAttr("aidbox_sdc_config.default_storage", "description", "Updated SDC config"),

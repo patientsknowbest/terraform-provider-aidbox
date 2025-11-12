@@ -7,6 +7,7 @@ import (
 )
 
 func TestAccResourceIdentityProvider(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
@@ -20,11 +21,16 @@ func TestAccResourceIdentityProvider(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "client.0.secret", "some_client_secret"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "scopes.0", "https://www.myidp.com/scope1"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "scopes.1", "https://www.myidp.com/scope2"),
+					resource.TestCheckResourceAttrWith("aidbox_identity_provider.myidp", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
 				),
 			},
 			{
 				Config: testAccResourceIdentityProvider_updated,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_identity_provider.myidp", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "title", "MyIDP"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "userinfo_source", "userinfo-endpoint"),
 					resource.TestCheckResourceAttr("aidbox_identity_provider.myidp", "client.0.id", "some_client_id"),

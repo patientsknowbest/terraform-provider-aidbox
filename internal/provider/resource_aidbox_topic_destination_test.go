@@ -1,8 +1,10 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAidboxTopicDestinaton_subscribeToPatientEvents(t *testing.T) {
@@ -24,6 +26,10 @@ func TestAccAidboxTopicDestinaton_subscribeToPatientEvents(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "parameter.3.string", "User-Agent: Aidbox Server"),
 				),
 			},
+			{
+				ExpectError: regexp.MustCompile("doesn't support update"),
+				Config:      testAccAidboxTopicDestinatopn_subscribeToPatientEvents_updateViaForceNew,
+			},
 		},
 	})
 }
@@ -43,6 +49,40 @@ resource "aidbox_aidbox_topic_destination" "patient_changes" {
   parameter {
     name = "endpoint"
     url = "https://aidbox.requestcatcher.com/patient-webhook"
+  }
+  parameter {
+    name = "timeout"
+    unsigned_int = 30
+  }
+  parameter {
+    name = "maxMessagesInBatch"
+    unsigned_int = 1
+  }
+  parameter {
+    name = "header"
+    string = "User-Agent: Aidbox Server"
+  }
+  depends_on = [
+    aidbox_aidbox_subscription_topic.patient_changes
+  ]
+}
+`
+
+const testAccAidboxTopicDestinatopn_subscribeToPatientEvents_updateViaForceNew = `
+resource "aidbox_aidbox_subscription_topic" "patient_changes" {
+  url = "https://fhir.yourcompany.com/subscriptiontopic/patient-changes"
+  trigger {
+    resource = "Patient"
+  }
+}
+
+resource "aidbox_aidbox_topic_destination" "patient_changes" {
+  topic = aidbox_aidbox_subscription_topic.patient_changes.url
+  kind = "webhook"
+  content = "id-only"
+  parameter {
+    name = "endpoint"
+    url = "https://aidbox.requestcatcher.com/patient-webhook-updated"
   }
   parameter {
     name = "timeout"

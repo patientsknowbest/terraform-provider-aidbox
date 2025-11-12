@@ -24,6 +24,7 @@ func TestAccResourceTokenIntrospector_jwt(t *testing.T) {
 }
 
 func TestAccResourceTokenIntrospector_opaque(t *testing.T) {
+	previousIdState := ""
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
@@ -33,6 +34,19 @@ func TestAccResourceTokenIntrospector_opaque(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "type", "opaque"),
 					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "introspection_endpoint.0.authorization", "Bearer foobar"),
+					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "introspection_endpoint.0.url", "https://example.com/auth"),
+					resource.TestCheckResourceAttrWith("aidbox_token_introspector.example2", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
+				),
+			},
+			{
+				Config: testAccResourceTokenIntrospector_opaque_updateAuthorization,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_token_introspector.example2", "id", &previousIdState),
+					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "type", "opaque"),
+					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "introspection_endpoint.0.authorization", "Bearer theBear"),
 					resource.TestCheckResourceAttr("aidbox_token_introspector.example2", "introspection_endpoint.0.url", "https://example.com/auth"),
 				),
 			},
@@ -55,6 +69,16 @@ resource "aidbox_token_introspector" "example2" {
   type = "opaque"
   introspection_endpoint {
     authorization = "Bearer foobar"
+    url = "https://example.com/auth"
+  }
+}
+`
+
+const testAccResourceTokenIntrospector_opaque_updateAuthorization = `
+resource "aidbox_token_introspector" "example2" {
+  type = "opaque"
+  introspection_endpoint {
+    authorization = "Bearer theBear"
     url = "https://example.com/auth"
   }
 }

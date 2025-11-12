@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
@@ -13,12 +14,12 @@ const (
 	KindProfileTemplate = "http://aidbox.app/StructureDefinition/aidboxtopicdestination-%s-at-least-once"
 )
 
+// Update is not supported by resource type
 func resourceAidboxTopicDestination() *schema.Resource {
 	return &schema.Resource{
 		Description:   "AidboxTopicDestination https://docs.aidbox.app/modules/topic-based-subscriptions/wip-dynamic-subscriptiontopic-with-destinations",
 		CreateContext: resourceAidboxTopicDestinationCreate,
 		ReadContext:   resourceAidboxTopicDestinationRead,
-		UpdateContext: resourceAidboxTopicDestinationUpdate,
 		DeleteContext: resourceAidboxTopicDestinationDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceAidboxTopicDestinationImport,
@@ -30,21 +31,25 @@ func resourceAidboxTopicDestination() *schema.Resource {
 func resourceSchemaAidboxTopicDestination() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"topic": {
+			ForceNew:    true,
 			Description: "Unique URL of the topic to subscribe on",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
 		"kind": {
+			ForceNew:    true,
 			Description: "One of kafka, webhook or gcp-pubsub",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
 		"content": {
+			ForceNew:    true,
 			Description: "One of full-resource, id-only or empty",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
 		"parameter": {
+			ForceNew:    true,
 			Description: "Channel-dependent information to send as part of the notification (e.g., HTTP Headers).",
 			Type:        schema.TypeList,
 			Optional:    true,
@@ -78,6 +83,7 @@ func resourceSchemaAidboxTopicDestination() map[string]*schema.Schema {
 
 func mapAidboxTopicDestinationFromData(data *schema.ResourceData) (*aidbox.AidboxTopicDestination, error) {
 	res := &aidbox.AidboxTopicDestination{}
+	res.ID = data.Id()
 	res.Topic = data.Get("topic").(string)
 	res.Content = data.Get("content").(string)
 
@@ -146,20 +152,6 @@ func resourceAidboxTopicDestinationRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 	mapAidboxTopicDestinationToData(res, d)
-	return nil
-}
-
-func resourceAidboxTopicDestinationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	apiClient := meta.(*aidbox.ApiClient)
-	q, err := mapAidboxTopicDestinationFromData(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	ac, err := apiClient.UpdateAidboxTopicDestination(ctx, q)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	mapAidboxTopicDestinationToData(ac, d)
 	return nil
 }
 

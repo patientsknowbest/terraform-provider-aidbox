@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
-	"log"
 )
 
 func resourceIdentityProvider() *schema.Resource {

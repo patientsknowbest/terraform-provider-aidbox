@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/patientsknowbest/terraform-provider-aidbox/aidbox"
@@ -54,6 +55,7 @@ func resourceSchemaAidboxSubscriptionTopic() map[string]*schema.Schema {
 
 func mapAidboxSubscriptionTopicFromData(data *schema.ResourceData) (*aidbox.AidboxSubscriptionTopic, error) {
 	res := &aidbox.AidboxSubscriptionTopic{}
+	res.ID = data.Id()
 	res.Url = data.Get("url").(string)
 	res.Status = data.Get("status").(string)
 
