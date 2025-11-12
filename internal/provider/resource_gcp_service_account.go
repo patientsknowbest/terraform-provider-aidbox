@@ -34,6 +34,12 @@ func resourceSchemaGcpServiceAccount() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Required:    true,
 		},
+		"private_key": {
+			Description: "The private key of the GCP service account.",
+			Type:        schema.TypeString,
+			Sensitive:   true,
+			Required:    true,
+		},
 	}
 }
 
@@ -48,6 +54,9 @@ func mapGcpServiceAccountFromData(data *schema.ResourceData) (*aidbox.GcpService
 	if v, ok := data.GetOk("service_account_email"); ok {
 		res.ServiceAccountEmail = v.(string)
 	}
+	if v, ok := data.GetOk("private_key"); ok {
+		res.GcloudKey = v.(string)
+	}
 
 	return res, nil
 }
@@ -59,6 +68,7 @@ func mapGcpServiceAccountToData(res *aidbox.GcpServiceAccount, data *schema.Reso
 	// by its name in Aidbox (not a server-generated UUID).
 	data.Set("name", res.ID)
 	data.Set("service_account_email", res.ServiceAccountEmail)
+	data.Set("private_key", res.GcloudKey)
 	return nil
 }
 
