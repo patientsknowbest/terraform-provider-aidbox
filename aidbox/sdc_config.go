@@ -21,7 +21,7 @@ type SDCConfig struct {
 }
 
 func (*SDCConfig) GetResourcePath() string {
-	return "fhir/SDCConfig"
+	return "/SDCConfig"
 }
 
 func (apiClient *ApiClient) CreateSDCConfig(ctx context.Context, sDCConfig *SDCConfig) (*SDCConfig, error) {

@@ -50,7 +50,8 @@ const storage_v1 = `
 {
   "bucket": "attachment-store-rc",
   "account": {
-    "reference": "GcpServiceAccount/aidbox-test-for-sdc"
+	"id" : "aidbox-test-for-sdc",
+    "resourceType": "GcpServiceAccount"
   }
 }
 `
@@ -70,7 +71,8 @@ resource "aidbox_sdc_config" "default_storage" {
   {
     "bucket": "attachment-store-rc",
     "account": {
-      "reference": "GcpServiceAccount/${aidbox_gcp_service_account.test_account.id}"
+		"id": "${aidbox_gcp_service_account.test_account.id}",
+        "resourceType": "GcpServiceAccount"
     }
   }
   EOT
@@ -81,7 +83,8 @@ const storage_v2 = `
 {
   "bucket": "attachment-store-rc-UPDATED",
   "account": {
-    "reference": "GcpServiceAccount/aidbox-test-for-sdc"
+    "id": "aidbox-test-for-sdc",
+    "resourceType": "GcpServiceAccount"
   }
 }
 `
@@ -101,7 +104,8 @@ resource "aidbox_sdc_config" "default_storage" {
   {
     "bucket": "attachment-store-rc-UPDATED",
     "account": {
-      "reference": "GcpServiceAccount/${aidbox_gcp_service_account.test_account.id}"
+	  "id": "${aidbox_gcp_service_account.test_account.id}",
+      "resourceType": "GcpServiceAccount"
     }
   }
   EOT
