@@ -20,9 +20,10 @@ resource "aidbox_sdc_config" "default_storage_config" {
   storage {
     bucket = "attachment-store-rc"
     account {
-      reference = "GcpServiceAccount/aidbox-rc"
+      id = "aidbox-rc"
+      resourceType = "GcpServiceAccount"
     }
-  }
+  } 
 }
 ```
 
