@@ -128,10 +128,18 @@ func (apiClient *ApiClient) addAuthAndHost(req *http.Request) {
 func errorToTerraform(request *http.Request, response *http.Response, requestBody interface{}, responseBody []byte) error {
 	var sensitiveDetails = ""
 	var prettyResponse bytes.Buffer
-	err := json.Indent(&prettyResponse, responseBody, "", "  ")
-	if err != nil {
-		panic(err)
+	jsonParseErr := json.Indent(&prettyResponse, responseBody, "", "  ")
+	if jsonParseErr != nil {
+		return fmt.Errorf("unexpected status code (%d) received: %s\n\n"+
+			"===== %s %s =====\n\n"+
+			"===== RESPONSE BODY =====\n"+
+			"%s\n",
+			response.StatusCode,
+			response.Status,
+			request.Method, request.URL.String(),
+			string(responseBody))
 	}
+
 	if os.Getenv("TF_ACC") == "1" {
 		prettyRequest, err := json.MarshalIndent(requestBody, "", "  ")
 		if err != nil {

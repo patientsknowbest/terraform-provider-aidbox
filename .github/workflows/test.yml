@@ -29,19 +29,13 @@ jobs:
       run: |
         go build -v .
 
-  # run acceptance tests in a matrix with Terraform core versions
+  # run acceptance tests
   test:
-    name: Matrix Test
+    name: Test
     needs: build
     runs-on: ubuntu-latest
     environment: "acceptance tests"
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        # list whatever Terraform versions here you would like to support
-        terraform:
-          - '1.5.7'
     steps:
 
     - name: Set up Go
@@ -57,6 +51,9 @@ jobs:
       run: |
         go mod download
 
+    - name: Unit tests
+      run: go test -v -cover ./...
+
     - name: Boot services for acceptance tests
       run: docker compose -f scripts/docker-compose.yaml up --wait -d
       env:
@@ -65,7 +62,7 @@ jobs:
       timeout-minutes: 10
       env:
         TF_ACC: "1"
-        TF_ACC_TERRAFORM_VERSION: ${{ matrix.terraform }}
+        TF_ACC_TERRAFORM_VERSION: '1.5.7'
 
         # Set whatever additional acceptance test env vars here. You can
         # optionally use data from your repository secrets using the
