@@ -3,10 +3,12 @@ package aidbox
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type TestResponse struct {
@@ -58,10 +60,28 @@ Service Unavailable
 		client := NewApiClient(server.URL, "foo", "bar")
 		err := client.post(context.TODO(), "", "/endpoint", "")
 
+		sensitiveDetails := ""
+		if os.Getenv("TF_ACC") == "1" {
+			sensitiveDetails = fmt.Sprintf(`
+===== REQUEST HEADERS =====
+{
+  "Authorization": [
+    "Basic Zm9vOmJhcg=="
+  ],
+  "Content-Type": [
+    "application/json"
+  ]
+}
+
+===== REQUEST BODY =====
+""
+`)
+		}
+
 		expectedError := fmt.Sprintf(`unexpected status code (422) received: 422 Unprocessable Entity
 
 ===== POST %s/endpoint =====
-
+%s
 ===== RESPONSE BODY =====
 {
   "name": "Ankh-Morpork City Watch",
@@ -75,7 +95,7 @@ Service Unavailable
     "Reg Shoe"
   ]
 }
-`, server.URL)
+`, server.URL, sensitiveDetails)
 
 		assert.Equal(t, expectedError, err.Error())
 	})

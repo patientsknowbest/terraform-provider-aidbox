@@ -11,7 +11,9 @@ import (
 
 func resourceStructureDefinition() *schema.Resource {
 	return &schema.Resource{
-		Description:   "FHIR R4 SearchParameter https://hl7.org/fhir/R4/searchparameter.html",
+		Description: "FHIR R4 StructureDefinition https://hl7.org/fhir/R4/structuredefinition.html Provides " +
+			"limited support to specify custom StructureDefinitions, that express customized rules extending the core " +
+			"FHIR spec, and get evaluated only if the caller specifies the SD's url in the request's meta.profile",
 		CreateContext: resourceStructureDefinitionCreate,
 		ReadContext:   resourceStructureDefinitionRead,
 		UpdateContext: resourceStructureDefinitionUpdate,
