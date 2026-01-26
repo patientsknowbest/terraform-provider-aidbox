@@ -40,6 +40,7 @@ func resourceSchemaStructureDefinitionOverride() map[string]*schema.Schema {
 			Description:           "A customized StructureDefinition, based on the original one from the core FHIR spec",
 			Type:                  schema.TypeString,
 			Required:              true,
+			Sensitive:             true,
 			DiffSuppressOnRefresh: true,
 			DiffSuppressFunc:      jsonDiffSuppressFunc,
 		},

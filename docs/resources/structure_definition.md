@@ -3,12 +3,12 @@
 page_title: "aidbox_structure_definition Resource - terraform-provider-aidbox"
 subcategory: ""
 description: |-
-  FHIR R4 SearchParameter https://hl7.org/fhir/R4/searchparameter.html
+  FHIR R4 StructureDefinition https://hl7.org/fhir/R4/structuredefinition.html Provides limited support to specify custom StructureDefinitions, that express customized rules extending the core FHIR spec, and get evaluated only if the caller specifies the SD's url in the request's meta.profile
 ---
 
 # aidbox_structure_definition (Resource)
 
-FHIR R4 SearchParameter https://hl7.org/fhir/R4/searchparameter.html
+FHIR R4 StructureDefinition https://hl7.org/fhir/R4/structuredefinition.html Provides limited support to specify custom StructureDefinitions, that express customized rules extending the core FHIR spec, and get evaluated only if the caller specifies the SD's url in the request's meta.profile
 
 ## Example Usage
 
