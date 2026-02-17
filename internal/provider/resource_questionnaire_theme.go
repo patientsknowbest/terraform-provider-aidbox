@@ -25,7 +25,7 @@ func resourceQuestionnaireTheme() *schema.Resource {
 func resourceSchemaQuestionnaireTheme() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"aidbox_id": {
-			Description: "The ID of the questionnaire theme",
+			Description: "The Aidbox ID of the questionnaire theme",
 			Type:        schema.TypeString,
 			Optional:    true,
 			Computed:    true,

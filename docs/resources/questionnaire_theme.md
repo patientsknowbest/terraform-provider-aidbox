@@ -14,7 +14,7 @@ QuestionnaireTheme https://www.health-samurai.io/docs/aidbox/reference/system-re
 
 ```terraform
 resource "aidbox_questionnaire_theme" "nhs_wayfinder_theme" {
-  id            = "nhs-wayfinder-theme"
+  aidbox_id     = "nhs-wayfinder-theme"
   theme_name    = "Wayfinder Theme"
   design_system = "NHS"
 }
@@ -25,6 +25,10 @@ resource "aidbox_questionnaire_theme" "nhs_wayfinder_theme" {
 
 ### Optional
 
+- `aidbox_id` (String) The Aidbox ID of the questionnaire theme
 - `design_system` (String) Design system of the theme
-- `id` (String) The ID of the questionnaire theme
 - `theme_name` (String) Name of the theme
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
