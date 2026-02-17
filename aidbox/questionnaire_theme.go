@@ -18,7 +18,7 @@ func (*QuestionnaireTheme) GetResourcePath() string {
 
 func (apiClient *ApiClient) CreateQuestionnaireTheme(ctx context.Context, theme *QuestionnaireTheme) (*QuestionnaireTheme, error) {
 	response := &QuestionnaireTheme{}
-	return response, apiClient.createResource(ctx, theme, response)
+	return response, apiClient.updateResource(ctx, theme, response)
 }
 
 func (apiClient *ApiClient) GetQuestionnaireTheme(ctx context.Context, id string) (*QuestionnaireTheme, error) {
