@@ -19,7 +19,7 @@ func TestAccQuestionnaireThemeResource(t *testing.T) {
 			{
 				Config: testAccQuestionnaireThemeResourceConfig("nhs-wayfinder-theme", "Wayfinder Theme", "NHS"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("aidbox_questionnaire_theme.nhs_wayfinder_theme", "id", "nhs-wayfinder-theme"),
+					resource.TestCheckResourceAttr("aidbox_questionnaire_theme.nhs_wayfinder_theme", "aidbox_id", "nhs-wayfinder-theme"),
 					resource.TestCheckResourceAttr("aidbox_questionnaire_theme.nhs_wayfinder_theme", "theme_name", "Wayfinder Theme"),
 					resource.TestCheckResourceAttr("aidbox_questionnaire_theme.nhs_wayfinder_theme", "design_system", "NHS"),
 				),
@@ -36,7 +36,7 @@ func TestAccQuestionnaireThemeResource(t *testing.T) {
 func testAccQuestionnaireThemeResourceConfig(id, themeName, designSystem string) string {
 	return fmt.Sprintf(`
 resource "aidbox_questionnaire_theme" "nhs_wayfinder_theme" {
-	id = "%s"
+	aidbox_id = "%s"
 	theme_name = "%s"
 	design_system = "%s"
 }
