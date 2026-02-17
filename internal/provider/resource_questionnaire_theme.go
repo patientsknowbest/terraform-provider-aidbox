@@ -27,8 +27,7 @@ func resourceSchemaQuestionnaireTheme() map[string]*schema.Schema {
 		"aidbox_id": {
 			Description: "The Aidbox ID of the questionnaire theme",
 			Type:        schema.TypeString,
-			Optional:    true,
-			Computed:    true,
+			Required:    true,
 			ForceNew:    true,
 		},
 		"theme_name": {
@@ -62,8 +61,6 @@ func mapQuestionnaireThemeFromData(d *schema.ResourceData) *aidbox.Questionnaire
 	res := &aidbox.QuestionnaireTheme{}
 	if v, ok := d.GetOk("aidbox_id"); ok {
 		res.ID = v.(string)
-	} else {
-		res.ID = d.Id()
 	}
 	if v, ok := d.GetOk("theme_name"); ok {
 		res.ThemeName = v.(string)
