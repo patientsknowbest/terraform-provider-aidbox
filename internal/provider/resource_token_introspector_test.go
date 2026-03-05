@@ -54,6 +54,26 @@ func TestAccResourceTokenIntrospector_opaque(t *testing.T) {
 	})
 }
 
+func TestAccResourceTokenIntrospector_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceTokenIntrospector_jwt,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_token_introspector.example", "type", "jwt"),
+				),
+			},
+			{
+				ResourceName:      "aidbox_token_introspector.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 const testAccResourceTokenIntrospector_jwt = `
 resource "aidbox_token_introspector" "example" {
   type = "jwt"

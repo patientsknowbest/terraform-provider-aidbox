@@ -17,7 +17,10 @@ func resourceTokenIntrospector() *schema.Resource {
 		ReadContext:   resourceTokenIntrospectorRead,
 		UpdateContext: resourceTokenIntrospectorUpdate,
 		DeleteContext: resourceTokenIntrospectorDelete,
-		Schema:        resourceFullSchema(resourceSchemaTokenIntrospector()),
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceTokenIntrospectorImport,
+		},
+		Schema: resourceFullSchema(resourceSchemaTokenIntrospector()),
 	}
 }
 
@@ -181,4 +184,14 @@ func resourceTokenIntrospectorDelete(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceTokenIntrospectorImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	apiClient := meta.(*aidbox.ApiClient)
+	res, err := apiClient.GetTokenIntrospector(ctx, d.Id())
+	if err != nil {
+		return nil, err
+	}
+	mapTokenIntrospectorToData(res, d)
+	return []*schema.ResourceData{d}, nil
 }
