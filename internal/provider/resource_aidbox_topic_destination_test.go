@@ -7,13 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAidboxTopicDestinaton_subscribeToPatientEvents(t *testing.T) {
+func TestAccAidboxTopicDestination_subscribeToPatientEvents(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { requireSchemaMode(t) },
 		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAidboxTopicDestinatopn_subscribeToPatientEvents,
+				Config: testAccAidboxTopicDestination_subscribeToPatientEvents,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "topic", "https://fhir.yourcompany.com/subscriptiontopic/patient-changes"),
 					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "parameter.0.name", "endpoint"),
@@ -24,17 +24,19 @@ func TestAccAidboxTopicDestinaton_subscribeToPatientEvents(t *testing.T) {
 					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "parameter.2.unsigned_int", "1"),
 					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "parameter.3.name", "header"),
 					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "parameter.3.string", "User-Agent: Aidbox Server"),
+					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "include_entry_action", "true"),
+					resource.TestCheckResourceAttr("aidbox_aidbox_topic_destination.patient_changes", "include_version_id", "false"),
 				),
 			},
 			{
 				ExpectError: regexp.MustCompile("doesn't support update"),
-				Config:      testAccAidboxTopicDestinatopn_subscribeToPatientEvents_updateViaForceNew,
+				Config:      testAccAidboxTopicDestination_subscribeToPatientEvents_updateViaForceNew,
 			},
 		},
 	})
 }
 
-const testAccAidboxTopicDestinatopn_subscribeToPatientEvents = `
+const testAccAidboxTopicDestination_subscribeToPatientEvents = `
 resource "aidbox_aidbox_subscription_topic" "patient_changes" {
   url = "https://fhir.yourcompany.com/subscriptiontopic/patient-changes"
   trigger {
@@ -46,6 +48,7 @@ resource "aidbox_aidbox_topic_destination" "patient_changes" {
   topic = aidbox_aidbox_subscription_topic.patient_changes.url
   kind = "webhook"
   content = "id-only"
+  include_version_id = false
   parameter {
     name = "endpoint"
     url = "https://aidbox.requestcatcher.com/patient-webhook"
@@ -68,7 +71,7 @@ resource "aidbox_aidbox_topic_destination" "patient_changes" {
 }
 `
 
-const testAccAidboxTopicDestinatopn_subscribeToPatientEvents_updateViaForceNew = `
+const testAccAidboxTopicDestination_subscribeToPatientEvents_updateViaForceNew = `
 resource "aidbox_aidbox_subscription_topic" "patient_changes" {
   url = "https://fhir.yourcompany.com/subscriptiontopic/patient-changes"
   trigger {
@@ -80,6 +83,7 @@ resource "aidbox_aidbox_topic_destination" "patient_changes" {
   topic = aidbox_aidbox_subscription_topic.patient_changes.url
   kind = "webhook"
   content = "id-only"
+  include_version_id = false
   parameter {
     name = "endpoint"
     url = "https://aidbox.requestcatcher.com/patient-webhook-updated"

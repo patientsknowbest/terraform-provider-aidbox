@@ -48,6 +48,20 @@ func resourceSchemaAidboxTopicDestination() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Required:    true,
 		},
+		"include_entry_action": {
+			ForceNew:    true,
+			Description: "When true, each Bundle.entry includes the bundle-entryActionCode extension indicating the CRUD action (create | update | delete) that triggered the notification. Default: true.",
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+		},
+		"include_version_id": {
+			ForceNew:    true,
+			Description: "When true, each Bundle.entry includes the bundle-entryVersionId extension containing the resource's meta.versionId at the time of the notification. Default: true.",
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+		},
 		"parameter": {
 			ForceNew:    true,
 			Description: "Channel-dependent information to send as part of the notification (e.g., HTTP Headers).",
@@ -86,6 +100,8 @@ func mapAidboxTopicDestinationFromData(data *schema.ResourceData) (*aidbox.Aidbo
 	res.ID = data.Id()
 	res.Topic = data.Get("topic").(string)
 	res.Content = data.Get("content").(string)
+	res.IncludeEntryAction = data.Get("include_entry_action").(bool)
+	res.IncludeVersionId = data.Get("include_version_id").(bool)
 
 	// parameter
 	rawParameter := data.Get("parameter").([]interface{})
@@ -114,6 +130,9 @@ func mapAidboxTopicDestinationFromData(data *schema.ResourceData) (*aidbox.Aidbo
 func mapAidboxTopicDestinationToData(res *aidbox.AidboxTopicDestination, data *schema.ResourceData) {
 	data.SetId(res.ID)
 	data.Set("topic", res.Topic)
+	data.Set("content", res.Content)
+	data.Set("include_entry_action", res.IncludeEntryAction)
+	data.Set("include_version_id", res.IncludeVersionId)
 
 	// parameter
 	parameter := make([]interface{}, len(res.Parameter))

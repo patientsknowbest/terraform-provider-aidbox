@@ -6,10 +6,12 @@ import (
 
 type AidboxTopicDestination struct {
 	ResourceBase
-	Topic     string                  `json:"topic"`
-	Kind      string                  `json:"kind"`
-	Content   string                  `json:"content"`
-	Parameter []SubscriptionParameter `json:"parameter"`
+	Topic              string                  `json:"topic"`
+	Kind               string                  `json:"kind"`
+	Content            string                  `json:"content"`
+	Parameter          []SubscriptionParameter `json:"parameter"`
+	IncludeEntryAction bool                    `json:"includeEntryAction"`
+	IncludeVersionId   bool                    `json:"includeVersionId"`
 }
 
 type SubscriptionParameter struct {
