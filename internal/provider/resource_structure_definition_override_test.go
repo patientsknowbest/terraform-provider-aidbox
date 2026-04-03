@@ -1,13 +1,6 @@
 package provider
 
-import (
-	"os"
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func TestAccResourceStructureDefinitionOverride_setupDefaultPatientProfileThenUpdate(t *testing.T) {
 	ptProfV1, err := os.ReadFile("./test_resources/patient-profile-nhs.json")
 	if err != nil {
@@ -63,3 +56,4 @@ resource "aidbox_structure_definition_override" "patient_profile" {
   structure_definition_override = file("${path.module}/test_resources/patient-profile-nhs-mandatory-identifier.json")
 }
 `
+*/

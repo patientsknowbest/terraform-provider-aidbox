@@ -9,9 +9,16 @@ services:
       POSTGRES_DB: aidbox
       POSTGRES_PORT: "5432"
   devbox:
+    extra_hosts:
+      # connect Aidbox container and NATS from localhost
+      - "host.docker.internal:172.18.0.1"
+    volumes:
+      # module jar to turn on nats support
+      - ./topic-destination-nats-2604.0.jar:/topic-destination-nats-2604.0.jar
     depends_on:
       - database-devbox
-    image: "healthsamurai/aidboxone:2512"
+    # from :edge, pushed on 30/04/2026 08:25
+    image: "healthsamurai/aidboxone@sha256:ed1e45d28c9fa69e5dc3fc0a367839aa91a86fca10ec751256fad9c60d33485b"
     ports:
       - "8888:8888"
     environment:
@@ -25,6 +32,9 @@ services:
       AIDBOX_FHIR_PACKAGES: hl7.fhir.r4.core#4.0.1
       AIDBOX_FHIR_SCHEMA_VALIDATION: true
       AIDBOX_CREATED_AT_URL: https://aidbox.app/ex/createdAt
+      BOX_MODULE_LOAD: "io.healthsamurai.topic-destination.nats.core"
+      BOX_MODULE_JAR: "/topic-destination-nats-2604.0.jar"
+      BOX_OBSERVABILITY_STDOUT_PRETTY_LOG_LEVEL: "trace"
       PGUSER: aidbox
       PGPASSWORD: secret
       PGDATABASE: aidbox

@@ -25,7 +25,7 @@ func resourceAidboxSubscriptionTopic() *schema.Resource {
 func resourceSchemaAidboxSubscriptionTopic() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"url": {
-			Description: "Canonical identifier for this search parameter, represented as a URI (globally unique)",
+			Description: "Canonical identifier for this subscription topic, represented as an absolute URI (globally unique).",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
@@ -36,7 +36,7 @@ func resourceSchemaAidboxSubscriptionTopic() map[string]*schema.Schema {
 			Default:     "active",
 		},
 		"trigger": {
-			Description: "Definition of a trigger for the subscription topic",
+			Description: "Definition of a resource-based trigger for the subscription topic.",
 			Type:        schema.TypeList,
 			Required:    true,
 			MinItems:    1,
@@ -45,7 +45,7 @@ func resourceSchemaAidboxSubscriptionTopic() map[string]*schema.Schema {
 					"resource": {
 						Type:        schema.TypeString,
 						Required:    true,
-						Description: "\tKey Data Type, Resource (reference to definition), or relevant definition for this trigger",
+						Description: "Data Type or Resource (reference to definition) for this trigger definition.",
 					},
 				},
 			},
