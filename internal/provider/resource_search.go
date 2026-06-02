@@ -29,6 +29,11 @@ func resourceSchemaSearch() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Required:    true,
 		},
+		"param_parser": {
+			Description: "Parser type for the search parameter",
+			Type:        schema.TypeString,
+			Optional:    true,
+		},
 		"module": {
 			Description: "Module name",
 			Type:        schema.TypeString,
@@ -67,6 +72,7 @@ func resourceSchemaSearch() map[string]*schema.Schema {
 func mapSearchFromData(data *schema.ResourceData) (*aidbox.Search, error) {
 	res := &aidbox.Search{}
 	res.Name = data.Get("name").(string)
+	res.ParamParser = data.Get("param_parser").(string)
 	res.Module = data.Get("module").(string)
 	res.Where = data.Get("where").(string)
 
@@ -86,6 +92,7 @@ func mapSearchFromData(data *schema.ResourceData) (*aidbox.Search, error) {
 func mapSearchToData(res *aidbox.Search, data *schema.ResourceData) {
 	data.SetId(res.ID)
 	data.Set("name", res.Name)
+	data.Set("param_parser", res.ParamParser)
 	data.Set("module", res.Module)
 	data.Set("where", res.Where)
 
