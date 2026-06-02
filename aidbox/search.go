@@ -7,10 +7,11 @@ import (
 // Aidbox Search resource: https://docs.aidbox.app/api/rest-api/aidbox-search#search-resource
 type Search struct {
 	ResourceBase
-	Name     string    `json:"name"`
-	Module   string    `json:"module,omitempty"`
-	Resource Reference `json:"resource"`
-	Where    string    `json:"where"`
+	Name        string    `json:"name"`
+	ParamParser string    `json:"param-parser,omitempty"`
+	Module      string    `json:"module,omitempty"`
+	Resource    Reference `json:"resource"`
+	Where       string    `json:"where"`
 }
 
 func (*Search) GetResourcePath() string {

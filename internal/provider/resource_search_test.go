@@ -16,6 +16,7 @@ func TestAccResourceSearch_happyPath(t *testing.T) {
 				Config: testAccResourceSearch_happyPath,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "name", "phone-number"),
+					resource.TestCheckResourceAttr("aidbox_search.example_phone", "param_parser", "reference"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "module", "fhir-4.0.1"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "reference.0.resource_id", "Patient"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "reference.0.resource_type", "Entity"),
@@ -31,6 +32,7 @@ func TestAccResourceSearch_happyPath(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPtr("aidbox_search.example_phone", "id", &previousIdState),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "name", "phone-number"),
+					resource.TestCheckResourceAttr("aidbox_search.example_phone", "param_parser", "reference"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "module", "fhir-4.0.1"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "reference.0.resource_id", "Patient"),
 					resource.TestCheckResourceAttr("aidbox_search.example_phone", "reference.0.resource_type", "Entity"),
@@ -43,8 +45,9 @@ func TestAccResourceSearch_happyPath(t *testing.T) {
 
 const testAccResourceSearch_happyPath = `
 resource "aidbox_search" "example_phone" {
-  name     = "phone-number"
-  module   = "fhir-4.0.1"
+  name         = "phone-number"
+  param_parser = "reference"
+  module       = "fhir-4.0.1"
   reference {
     resource_id   = "Patient"
     resource_type = "Entity"
@@ -55,8 +58,9 @@ resource "aidbox_search" "example_phone" {
 
 const testAccResourceSearch_happyPath_updateWhereClause = `
 resource "aidbox_search" "example_phone" {
-  name     = "phone-number"
-  module   = "fhir-4.0.1"
+  name         = "phone-number"
+  param_parser = "reference"
+  module       = "fhir-4.0.1"
   reference {
     resource_id   = "Patient"
     resource_type = "Entity"

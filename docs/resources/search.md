@@ -14,8 +14,9 @@ Search https://docs.aidbox.app/api/rest-api/aidbox-search#search-resource
 
 ```terraform
 resource "aidbox_search" "example_extension" {
-  name   = "custom-date"
-  module = "fhir-4.0.1"
+  name         = "custom-date"
+  param_parser = "reference"
+  module       = "fhir-4.0.1"
   reference {
     resource_id   = "Appointment"
     resource_type = "Entity"
@@ -36,6 +37,7 @@ resource "aidbox_search" "example_extension" {
 ### Optional
 
 - `module` (String) Module name
+- `param_parser` (String) Parser type for the search parameter
 
 ### Read-Only
 
