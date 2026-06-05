@@ -32,13 +32,13 @@ func resourceSchemaAidboxTopicDestination() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"topic": {
 			ForceNew:    true,
-			Description: "Unique URL of the topic to subscribe on",
+			Description: "Reference to the AidboxSubscriptionTopic being subscribed to.",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
 		"kind": {
 			ForceNew:    true,
-			Description: "One of kafka, webhook or gcp-pubsub",
+			Description: "Defines the destination for sending notifications. Supported values: kafka-at-least-once, kafka-best-effort, webhook-at-least-once, gcp-pubsub-at-least-once, nats-at-least-once, nats-best-effort, amqp-at-least-once, aws-eventbridge, aws-sns, clickhouse, clickhouse-at-least-once, bigquery-at-least-once, data-lakehouse-at-least-once",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
@@ -48,9 +48,23 @@ func resourceSchemaAidboxTopicDestination() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Required:    true,
 		},
+		"include_entry_action": {
+			ForceNew:    true,
+			Description: "When true, each Bundle.entry includes the bundle-entryActionCode extension indicating the CRUD action (create | update | delete) that triggered the notification. Default: true.",
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+		},
+		"include_version_id": {
+			ForceNew:    true,
+			Description: "When true, each Bundle.entry includes the bundle-entryVersionId extension containing the resource's meta.versionId at the time of the notification. Default: true.",
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+		},
 		"parameter": {
 			ForceNew:    true,
-			Description: "Channel-dependent information to send as part of the notification (e.g., HTTP Headers).",
+			Description: "Defines the destination parameters for sending notifications. Parameters are restricted by profiles for each destination.",
 			Type:        schema.TypeList,
 			Optional:    true,
 			Elem: &schema.Resource{
@@ -86,6 +100,8 @@ func mapAidboxTopicDestinationFromData(data *schema.ResourceData) (*aidbox.Aidbo
 	res.ID = data.Id()
 	res.Topic = data.Get("topic").(string)
 	res.Content = data.Get("content").(string)
+	res.IncludeEntryAction = data.Get("include_entry_action").(bool)
+	res.IncludeVersionId = data.Get("include_version_id").(bool)
 
 	// parameter
 	rawParameter := data.Get("parameter").([]interface{})
@@ -114,6 +130,9 @@ func mapAidboxTopicDestinationFromData(data *schema.ResourceData) (*aidbox.Aidbo
 func mapAidboxTopicDestinationToData(res *aidbox.AidboxTopicDestination, data *schema.ResourceData) {
 	data.SetId(res.ID)
 	data.Set("topic", res.Topic)
+	data.Set("content", res.Content)
+	data.Set("include_entry_action", res.IncludeEntryAction)
+	data.Set("include_version_id", res.IncludeVersionId)
 
 	// parameter
 	parameter := make([]interface{}, len(res.Parameter))
