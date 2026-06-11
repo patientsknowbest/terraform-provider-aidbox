@@ -40,6 +40,12 @@ func mapAccessPolicyToData(res *aidbox.AccessPolicy, data *schema.ResourceData) 
 	if string(res.Schema) != "" {
 		data.Set("schema", string(res.Schema))
 	}
+	if string(res.Matcho) != "" {
+		data.Set("matcho", string(res.Matcho))
+	}
+	if string(res.Rpc) != "" {
+		data.Set("rpc", string(res.Rpc))
+	}
 }
 
 func mapAccessPolicyFromData(d *schema.ResourceData) *aidbox.AccessPolicy {
@@ -65,6 +71,12 @@ func mapAccessPolicyFromData(d *schema.ResourceData) *aidbox.AccessPolicy {
 	}
 	if vv, ok := d.GetOk("schema"); ok {
 		res.Schema = json.RawMessage(vv.(string))
+	}
+	if vv, ok := d.GetOk("matcho"); ok {
+		res.Matcho = json.RawMessage(vv.(string))
+	}
+	if vv, ok := d.GetOk("rpc"); ok {
+		res.Rpc = json.RawMessage(vv.(string))
 	}
 	return res
 }
@@ -131,12 +143,24 @@ func resourceSchemaAccessPolicy() map[string]*schema.Schema {
 			Optional:    true,
 		},
 		"engine": {
-			Description: "The engine which is used to evaluate this policy. One of (json-schema|allow)",
+			Description: "The engine which is used to evaluate this policy. One of (json-schema|matcho|matcho-rpc|allow)",
 			Type:        schema.TypeString,
 			Required:    true,
 		},
 		"schema": {
 			Description:      "JSON-schema policy to be evaluated. Used only if engine is json-schema",
+			Type:             schema.TypeString,
+			Optional:         true,
+			DiffSuppressFunc: jsonDiffSuppressFunc,
+		},
+		"matcho": {
+			Description:      "Matcho policy to be evaluated. Used only if the engine is matcho",
+			Type:             schema.TypeString,
+			Optional:         true,
+			DiffSuppressFunc: jsonDiffSuppressFunc,
+		},
+		"rpc": {
+			Description:      "Rpc policy to be evaluated. Used only if the engine is matcho-rpc",
 			Type:             schema.TypeString,
 			Optional:         true,
 			DiffSuppressFunc: jsonDiffSuppressFunc,

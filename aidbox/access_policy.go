@@ -13,6 +13,8 @@ type AccessPolicy struct {
 	Engine      AccessPolicyEngine `json:"engine"`
 	Schema      json.RawMessage    `json:"schema,omitempty"`
 	Link        []Reference        `json:"link,omitempty"`
+	Matcho      json.RawMessage    `json:"matcho,omitempty"`
+	Rpc         json.RawMessage    `json:"rpc,omitempty"`
 }
 
 func (*AccessPolicy) GetResourcePath() string {
@@ -31,8 +33,9 @@ const (
 	AccessPolicyEngineAllow
 	//AccessPolicyEngineSql
 	//AccessPolicyEngineComplex
-	//AccessPolicyEngineMatcho
+	AccessPolicyEngineMatcho
 	//AccessPolicyEngineClj
+	AccessPolicyEngineMatchoRpc
 )
 
 func (g AccessPolicyEngine) ToString() string {
@@ -45,10 +48,12 @@ func (g AccessPolicyEngine) ToString() string {
 		//	return "sql"
 		//case AccessPolicyEngineComplex:
 		//	return "complex"
-		//case AccessPolicyEngineMatcho:
-		//	return "matcho"
+	case AccessPolicyEngineMatcho:
+		return "matcho"
 		//case AccessPolicyEngineClj:
 		//	return "clj"
+	case AccessPolicyEngineMatchoRpc:
+		return "matcho-rpc"
 	}
 	log.Panicf("Unexpected AccessPolicyEngine %d\n", g)
 	return ""
@@ -66,8 +71,10 @@ func ParseAccessPolicyEngine(s string) (AccessPolicyEngine, error) {
 	//	return AccessPolicyEngineSql, nil
 	//case "complex":
 	//	return AccessPolicyEngineComplex, nil
-	//case "matcho":
-	//	return AccessPolicyEngineMatcho, nil
+	case "matcho":
+		return AccessPolicyEngineMatcho, nil
+	case "matcho-rpc":
+		return AccessPolicyEngineMatchoRpc, nil
 	//case "clj":
 	//	return AccessPolicyEngineClj, nil
 	default:
