@@ -67,6 +67,7 @@ func New(apiClient *aidbox.ApiClient) func() *schema.Provider {
 				"aidbox_sdc_config":                    resourceSDCConfig(),
 				"aidbox_gcp_service_account":           resourceGcpServiceAccount(),
 				"aidbox_questionnaire_theme":           resourceQuestionnaireTheme(),
+				"aidbox_resource":                      resourceAidboxResource(),
 			},
 		}
 
