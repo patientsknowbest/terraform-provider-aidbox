@@ -70,6 +70,36 @@ func TestAccResourceAccessPolicy_schema_updated(t *testing.T) {
 	})
 }
 
+func TestAccResourceAccessPolicy_matcho(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAccessPolicy_matcho,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_access_policy.mymatchopolicy", "engine", "matcho"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceAccessPolicy_matcho_rpc(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAccessPolicy_matcho_rpc,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_access_policy.mymatchorpcpolicy", "engine", "matcho-rpc"),
+				),
+			},
+		},
+	})
+}
+
 const testAccResourceAccessPolicy_schema = `
 resource "aidbox_access_policy" "example" {
   description = "A policy to allow postman to access data"
@@ -174,4 +204,67 @@ resource "aidbox_access_policy" "mypolicy" {
     resource_type = "Client"
   }
 }
+`
+
+const testAccResourceAccessPolicy_matcho = `
+resource "aidbox_client" "client" {
+  name        = "client-id"
+  secret      = "__sha256:2BB80D537B1DA3E38BD30361AA855686BDE0EACD7162FEF6A25FE97BF527A25B"
+  grant_types = ["basic"]
+}
+resource "aidbox_access_policy" "mymatchopolicy" {
+  description = "A policy defined with matcho"
+  engine      = "matcho"
+  matcho = <<-EOT` + matcho + `
+EOT 
+}
+`
+const matcho = `
+{
+    "uri": {
+      "$one-of": [
+        "#/Questionnaire/.*",
+        "#/Questionnaire$"
+      ]
+    },
+    "user": {
+      "roles": [
+        {
+          "value": "form-importer"
+        }
+      ]
+    },
+    "request-method": "get"
+  }
+`
+const testAccResourceAccessPolicy_matcho_rpc = `
+resource "aidbox_client" "client" {
+  name        = "client-id"
+  secret      = "__sha256:2BB80D537B1DA3E38BD30361AA855686BDE0EACD7162FEF6A25FE97BF527A25B"
+  grant_types = ["basic"]
+}
+resource "aidbox_access_policy" "mymatchorpcpolicy" {
+  description = "A policy defined with matcho-rpc"
+  engine      = "matcho-rpc"
+  rpc = <<-EOT` + matcho_rpc + `
+EOT 
+}
+`
+const matcho_rpc = `
+{
+    "uri": {
+      "$one-of": [
+        "#/Questionnaire/.*",
+        "#/Questionnaire$"
+      ]
+    },
+    "user": {
+      "roles": [
+        {
+          "value": "form-importer"
+        }
+      ]
+    },
+    "request-method": "get"
+  }
 `
