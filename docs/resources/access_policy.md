@@ -57,12 +57,14 @@ resource "aidbox_access_policy" "example_allow" {
 
 ### Required
 
-- `engine` (String) The engine which is used to evaluate this policy. One of (json-schema|allow)
+- `engine` (String) The engine which is used to evaluate this policy. One of (json-schema|matcho|matcho-rpc|allow)
 
 ### Optional
 
 - `description` (String) Description of access policy for human users.
 - `link` (Block List) The actor to allow access. Used only if engine is allow. (see [below for nested schema](#nestedblock--link))
+- `matcho` (String) Matcho policy to be evaluated. Used only if the engine is matcho
+- `rpc` (String) Rpc policy to be evaluated. Used only if the engine is matcho-rpc
 - `schema` (String) JSON-schema policy to be evaluated. Used only if engine is json-schema
 
 ### Read-Only

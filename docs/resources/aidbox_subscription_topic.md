@@ -17,8 +17,8 @@ AidboxSubscriptionTopic https://docs.aidbox.app/modules/topic-based-subscription
 
 ### Required
 
-- `trigger` (Block List, Min: 1) Definition of a trigger for the subscription topic (see [below for nested schema](#nestedblock--trigger))
-- `url` (String) Canonical identifier for this search parameter, represented as a URI (globally unique)
+- `trigger` (Block List, Min: 1) Definition of a resource-based trigger for the subscription topic. (see [below for nested schema](#nestedblock--trigger))
+- `url` (String) Canonical identifier for this subscription topic, represented as an absolute URI (globally unique).
 
 ### Optional
 
@@ -33,4 +33,4 @@ AidboxSubscriptionTopic https://docs.aidbox.app/modules/topic-based-subscription
 
 Required:
 
-- `resource` (String) Key Data Type, Resource (reference to definition), or relevant definition for this trigger
+- `resource` (String) Data Type or Resource (reference to definition) for this trigger definition.

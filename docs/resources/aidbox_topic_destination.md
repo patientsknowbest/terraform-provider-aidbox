@@ -18,12 +18,14 @@ AidboxTopicDestination https://docs.aidbox.app/modules/topic-based-subscriptions
 ### Required
 
 - `content` (String) One of full-resource, id-only or empty
-- `kind` (String) One of kafka, webhook or gcp-pubsub
-- `topic` (String) Unique URL of the topic to subscribe on
+- `kind` (String) Defines the destination for sending notifications. Supported values: kafka-at-least-once, kafka-best-effort, webhook-at-least-once, gcp-pubsub-at-least-once, nats-at-least-once, nats-best-effort, amqp-at-least-once, aws-eventbridge, aws-sns, clickhouse, clickhouse-at-least-once, bigquery-at-least-once, data-lakehouse-at-least-once
+- `topic` (String) Reference to the AidboxSubscriptionTopic being subscribed to.
 
 ### Optional
 
-- `parameter` (Block List) Channel-dependent information to send as part of the notification (e.g., HTTP Headers). (see [below for nested schema](#nestedblock--parameter))
+- `include_entry_action` (Boolean) When true, each Bundle.entry includes the bundle-entryActionCode extension indicating the CRUD action (create | update | delete) that triggered the notification. Default: true.
+- `include_version_id` (Boolean) When true, each Bundle.entry includes the bundle-entryVersionId extension containing the resource's meta.versionId at the time of the notification. Default: true.
+- `parameter` (Block List) Defines the destination parameters for sending notifications. Parameters are restricted by profiles for each destination. (see [below for nested schema](#nestedblock--parameter))
 
 ### Read-Only
 
