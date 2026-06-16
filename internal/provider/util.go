@@ -38,26 +38,3 @@ func jsonDiffSuppressFunc(_ string, oldJson string, newJson string, _ *schema.Re
 	}
 	return reflect.DeepEqual(oldObject, newObject)
 }
-
-func jsonDiffSuppressMetaFunc(_ string, oldJson string, newJson string, _ *schema.ResourceData) bool {
-	if oldJson == "" && newJson != "" {
-		return false
-	}
-	if oldJson != "" && newJson == "" {
-		return false
-	}
-
-	var oldObject map[string]any
-	err := json.Unmarshal([]byte(oldJson), &oldObject)
-	if err != nil {
-		panic(err)
-	}
-	delete(oldObject, "meta")
-	var newObject map[string]any
-	err = json.Unmarshal([]byte(newJson), &newObject)
-	if err != nil {
-		panic(err)
-	}
-	delete(newObject, "meta")
-	return reflect.DeepEqual(oldObject, newObject)
-}

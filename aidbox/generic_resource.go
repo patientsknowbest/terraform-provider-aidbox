@@ -13,8 +13,8 @@ import (
 // Similar to kubernetes_manifest
 type GenericResource struct {
 	// this is the combined ResourceType/ID, otherwise terraform doesn't know how to destroy this thing.
-	ID              string
-	ResourceContent json.RawMessage
+	ResourceTypeAndId string
+	ResourceContent   json.RawMessage
 }
 
 func (g *GenericResource) MarshalJSON() ([]byte, error) {
@@ -22,56 +22,86 @@ func (g *GenericResource) MarshalJSON() ([]byte, error) {
 }
 
 func (g *GenericResource) UnmarshalJSON(b []byte) error {
-	id, err := parseId(b)
+	resourceTypeAndId, err := GetResourceTypeAndId(b)
 	if err != nil {
 		return err
 	}
 	*g = GenericResource{
-		id,
+		resourceTypeAndId,
 		b,
 	}
 	return nil
 }
 
-func parseId(b []byte) (string, error) {
-	var h map[string]any
-	err := json.Unmarshal(b, &h)
+func GetResourceTypeAndId(b []byte) (string, error) {
+	h, err := parseToMap(b)
 	if err != nil {
 		return "", err
 	}
-	idPart, ok := h["id"].(string)
-	if !ok {
-		return "", errors.New("no 'id' field in JSON body")
-	}
-	resourceType, ok := h["resourceType"].(string)
+	resourceType, ok := h["resourceType"]
 	if !ok {
 		return "", errors.New("no 'resourceType' field in JSON body")
 	}
-	return resourceType + "/" + idPart, nil
+	idPart, ok := h["id"]
+	if !ok {
+		return "", errors.New("no 'id' field in JSON body")
+	}
+	return resourceType.(string) + "/" + idPart.(string), nil
 }
 
-// These functions skip some of the high level abstraction, because GenericResource.ID is a combination of
+func getResourceType(b []byte) (string, error) {
+	h, err := parseToMap(b)
+	if err != nil {
+		return "", err
+	}
+	resourceType, ok := h["resourceType"]
+	if !ok {
+		return "", errors.New("no 'resourceType' field in JSON body")
+	}
+	return resourceType.(string), nil
+}
+
+func parseToMap(b []byte) (map[string]any, error) {
+	var h map[string]any
+	err := json.Unmarshal(b, &h)
+	if err != nil {
+		return nil, err
+	}
+	return h, nil
+}
+
+// These functions skip some of the high level abstraction, because GenericResource.ResourceTypeAndId is a combination of
 // the resourcetype/ID, it doesn't fit.
 func (apiClient *ApiClient) CreateGenericResource(ctx context.Context, genericResource *GenericResource) (*GenericResource, error) {
 	responseTarget := &GenericResource{}
-	id := genericResource.ID
-	if genericResource.ID == "" {
-		i, err := parseId(genericResource.ResourceContent)
-		if err != nil {
-			return nil, err
-		}
-		id = i
+	resourceType, err := getResourceType(genericResource.ResourceContent)
+	if err != nil {
+		return nil, err
 	}
-	err := apiClient.put(ctx, genericResource, path.Join("/", id), responseTarget)
+	resourceTypeAndId := genericResource.ResourceTypeAndId
+	if genericResource.ResourceTypeAndId == "" {
+		i, err := GetResourceTypeAndId(genericResource.ResourceContent)
+		if err == nil {
+			resourceTypeAndId = i
+		} else {
+			// couldn't parse an ID from the resource; don't panic, the user just didn't specify one, we'll use POST
+		}
+	}
+	if resourceTypeAndId != "" {
+		err = apiClient.put(ctx, genericResource, path.Join("/", resourceTypeAndId), responseTarget)
+	} else {
+		err = apiClient.post(ctx, genericResource, path.Join("/", resourceType), responseTarget)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	return responseTarget, nil
 }
 
-func (apiClient *ApiClient) GetGenericResource(ctx context.Context, id string) (*GenericResource, error) {
+func (apiClient *ApiClient) GetGenericResource(ctx context.Context, resourceTypeAndId string) (*GenericResource, error) {
 	responseTarget := &GenericResource{}
-	err := apiClient.get(ctx, path.Join("/", id), responseTarget)
+	err := apiClient.get(ctx, path.Join("/", resourceTypeAndId), responseTarget)
 	if err != nil {
 		return nil, err
 	}
@@ -80,13 +110,13 @@ func (apiClient *ApiClient) GetGenericResource(ctx context.Context, id string) (
 
 func (apiClient *ApiClient) UpdateGenericResource(ctx context.Context, q *GenericResource) (*GenericResource, error) {
 	responseTarget := &GenericResource{}
-	err := apiClient.put(ctx, q, path.Join("/", q.ID), responseTarget)
+	err := apiClient.put(ctx, q, path.Join("/", q.ResourceTypeAndId), responseTarget)
 	if err != nil {
 		return nil, err
 	}
 	return responseTarget, nil
 }
 
-func (apiClient *ApiClient) DeleteGenericResource(ctx context.Context, id string) error {
-	return apiClient.send(ctx, struct{}{}, path.Join("/", id), &struct{}{}, http.MethodDelete)
+func (apiClient *ApiClient) DeleteGenericResource(ctx context.Context, resourceTypeAndId string) error {
+	return apiClient.send(ctx, struct{}{}, path.Join("/", resourceTypeAndId), &struct{}{}, http.MethodDelete)
 }
