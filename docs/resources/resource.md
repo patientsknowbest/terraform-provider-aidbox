@@ -32,3 +32,4 @@ resource "aidbox_resource" "my_aidbox_job" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `id_assigned` (Boolean) Whether an ID was assigned in the original resource or not

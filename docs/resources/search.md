@@ -37,7 +37,8 @@ resource "aidbox_search" "example_extension" {
 ### Optional
 
 - `module` (String) Module name
-- `param_parser` (String) Parser type for the search parameter
+- `param_parser` (String) Parser type for the search parameter (allowed values `token`|`reference`)
+- `token_sql` (Block List, Max: 1) SQL templates for token parameter handling, used when param_parser = "token". See https://docs.aidbox.app/api/rest-api/aidbox-search#token-search (see [below for nested schema](#nestedblock--token_sql))
 
 ### Read-Only
 
@@ -50,3 +51,16 @@ Required:
 
 - `resource_id` (String) The ID of the referenced resource
 - `resource_type` (String) The type of the referenced resource
+
+
+<a id="nestedblock--token_sql"></a>
+### Nested Schema for `token_sql`
+
+Optional:
+
+- `both` (String) SQL template when both system and code are provided.
+- `no_system` (String) SQL template when no system is provided.
+- `only_code` (String) SQL template when only code is provided.
+- `only_system` (String) SQL template when only system is provided.
+- `text` (String) SQL template for text search.
+- `text_format` (String) Format for text search.

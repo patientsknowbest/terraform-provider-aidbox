@@ -12,6 +12,24 @@ type Search struct {
 	Module      string    `json:"module,omitempty"`
 	Resource    Reference `json:"resource"`
 	Where       string    `json:"where"`
+	TokenSql    *TokenSql `json:"token-sql,omitempty"`
+}
+
+// TokenSql holds the SQL fragments Aidbox uses for param-parser: token
+// search parameters. See https://docs.aidbox.app/api/rest-api/aidbox-search#token-search
+type TokenSql struct {
+	// SQL template when only code is provided
+	OnlyCode string `json:"only-code,omitempty"`
+	// SQL template when only system is provided
+	OnlySystem string `json:"only-system,omitempty"`
+	// SQL template when no system is provided
+	NoSystem string `json:"no-system,omitempty"`
+	// SQL template when both system and code are provided.
+	Both string `json:"both,omitempty"`
+	// SQL template for text search.
+	Text string `json:"text,omitempty"`
+	// Format for text search.
+	TextFormat string `json:"text-format,omitempty"`
 }
 
 func (*Search) GetResourcePath() string {

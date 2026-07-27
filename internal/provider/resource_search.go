@@ -30,7 +30,7 @@ func resourceSchemaSearch() map[string]*schema.Schema {
 			Required:    true,
 		},
 		"param_parser": {
-			Description: "Parser type for the search parameter",
+			Description: "Parser type for the search parameter (allowed values `token`|`reference`)",
 			Type:        schema.TypeString,
 			Optional:    true,
 		},
@@ -66,6 +66,47 @@ func resourceSchemaSearch() map[string]*schema.Schema {
 				},
 			},
 		},
+		"token_sql": {
+			Description: "SQL templates for token parameter handling, used when param_parser = \"token\". See https://docs.aidbox.app/api/rest-api/aidbox-search#token-search",
+			Type:        schema.TypeList,
+			Optional:    true,
+			MinItems:    0,
+			MaxItems:    1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"only_code": {
+						Description: "SQL template when only code is provided.",
+						Type:        schema.TypeString,
+						Optional:    true,
+					},
+					"only_system": {
+						Description: "SQL template when only system is provided.",
+						Type:        schema.TypeString,
+						Optional:    true,
+					},
+					"no_system": {
+						Description: "SQL template when no system is provided.",
+						Type:        schema.TypeString,
+						Optional:    true,
+					},
+					"both": {
+						Description: "SQL template when both system and code are provided.",
+						Type:        schema.TypeString,
+						Optional:    true,
+					},
+					"text": {
+						Description: "SQL template for text search.",
+						Type:        schema.TypeString,
+						Optional:    true,
+					},
+					"text_format": {
+						Description: "Format for text search.",
+						Type:        schema.TypeString,
+						Optional:    true,
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -86,6 +127,17 @@ func mapSearchFromData(data *schema.ResourceData) (*aidbox.Search, error) {
 
 	res.ID = res.Resource.ResourceId + "." + res.Name
 
+	if v, ok := data.GetOk("token_sql"); ok {
+		ts := v.([]interface{})[0].(map[string]interface{})
+		res.TokenSql = &aidbox.TokenSql{
+			OnlyCode:   ts["only_code"].(string),
+			OnlySystem: ts["only_system"].(string),
+			NoSystem:   ts["no_system"].(string),
+			Both:       ts["both"].(string),
+			Text:       ts["text"].(string),
+			TextFormat: ts["text_format"].(string),
+		}
+	}
 	return res, nil
 }
 
@@ -103,6 +155,19 @@ func mapSearchToData(res *aidbox.Search, data *schema.ResourceData) {
 		"resource_type": res.Resource.ResourceType,
 	}
 	data.Set("reference", append(ref, r))
+
+	if res.TokenSql != nil {
+		var ts []interface{}
+		// ignoring the error -> following the pattern above (where its ignored implicitly)
+		_ = data.Set("token_sql", append(ts, map[string]string{
+			"only_code":   res.TokenSql.OnlyCode,
+			"only_system": res.TokenSql.OnlySystem,
+			"no_system":   res.TokenSql.NoSystem,
+			"both":        res.TokenSql.Both,
+			"text":        res.TokenSql.Text,
+			"text_format": res.TokenSql.TextFormat,
+		}))
+	}
 }
 
 func resourceSearchCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
