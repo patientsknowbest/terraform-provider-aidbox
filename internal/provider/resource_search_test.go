@@ -43,6 +43,43 @@ func TestAccResourceSearch_happyPath(t *testing.T) {
 	})
 }
 
+func TestAccResourceSearch_tokenSql(t *testing.T) {
+	previousIdState := ""
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { requireSchemaMode(t) },
+		ProviderFactories: testProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceSearch_tokenSql,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "name", "prescription-status"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "param_parser", "token"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "reference.0.resource_id", "ServiceRequest"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "reference.0.resource_type", "Entity"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "token_sql.0.only_code", "resource @> 'dispensed'"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "token_sql.0.no_system", "resource @> 'dispensed'"),
+					resource.TestCheckResourceAttrWith("aidbox_search.example_prescription_status", "id", func(id string) error {
+						previousIdState = id
+						return nil
+					}),
+				),
+			},
+			{
+				Config: testAccResourceSearch_tokenSql_updateClause,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPtr("aidbox_search.example_prescription_status", "id", &previousIdState),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "name", "prescription-status"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "param_parser", "token"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "reference.0.resource_id", "ServiceRequest"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "reference.0.resource_type", "Entity"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "token_sql.0.only_code", "resource @> 'fulfilled'"),
+					resource.TestCheckResourceAttr("aidbox_search.example_prescription_status", "token_sql.0.no_system", "resource @> 'fulfilled'"),
+				),
+			},
+		},
+	})
+}
+
 const testAccResourceSearch_happyPath = `
 resource "aidbox_search" "example_phone" {
   name         = "phone-number"
@@ -66,5 +103,37 @@ resource "aidbox_search" "example_phone" {
     resource_type = "Entity"
   }
   where = "phone-number = 00000000000"
+}
+`
+
+const testAccResourceSearch_tokenSql = `
+resource "aidbox_search" "example_prescription_status" {
+  name         = "prescription-status"
+  param_parser = "token"
+  reference {
+    resource_id   = "ServiceRequest"
+    resource_type = "Entity"
+  }
+  where = "true"
+  token_sql {
+    only_code = "resource @> 'dispensed'"
+    no_system = "resource @> 'dispensed'"
+  }
+}
+`
+
+const testAccResourceSearch_tokenSql_updateClause = `
+resource "aidbox_search" "example_prescription_status" {
+  name         = "prescription-status"
+  param_parser = "token"
+  reference {
+    resource_id   = "ServiceRequest"
+    resource_type = "Entity"
+  }
+  where = "true"
+  token_sql {
+    only_code = "resource @> 'fulfilled'"
+    no_system = "resource @> 'fulfilled'"
+  }
 }
 `
