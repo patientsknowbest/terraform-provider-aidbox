@@ -1,3 +1,7 @@
+## Deprecation
+
+This terraform provider is deprecated. Instead you should use Aidbox' [init-bundle](https://www.health-samurai.io/docs/aidbox/configuration/init-bundle) feature.
+
 # Terraform Provider Aidbox
 
 Terraform provider for [aidbox](https://docs.aidbox.app/).
