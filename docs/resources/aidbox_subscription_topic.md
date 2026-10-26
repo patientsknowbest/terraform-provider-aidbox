@@ -34,3 +34,7 @@ AidboxSubscriptionTopic https://docs.aidbox.app/modules/topic-based-subscription
 Required:
 
 - `resource` (String) Data Type or Resource (reference to definition) for this trigger definition.
+
+Optional:
+
+- `fhir_path_criteria` (String) FHIRPath expression that a change must match to fire the trigger. `%current` is the resource after the change, for example `%current.status = 'completed'`.

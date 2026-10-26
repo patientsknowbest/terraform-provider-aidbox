@@ -47,6 +47,11 @@ func resourceSchemaAidboxSubscriptionTopic() map[string]*schema.Schema {
 						Required:    true,
 						Description: "Data Type or Resource (reference to definition) for this trigger definition.",
 					},
+					"fhir_path_criteria": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "FHIRPath expression that a change must match to fire the trigger. `%current` is the resource after the change, for example `%current.status = 'completed'`.",
+					},
 				},
 			},
 		},
@@ -65,7 +70,8 @@ func mapAidboxSubscriptionTopicFromData(data *schema.ResourceData) (*aidbox.Aidb
 	for i, v := range rawTrigger {
 		rawTopicTrigger := v.(map[string]interface{})
 		trigger[i] = aidbox.TopicTrigger{
-			Resource: rawTopicTrigger["resource"].(string),
+			Resource:         rawTopicTrigger["resource"].(string),
+			FhirPathCriteria: rawTopicTrigger["fhir_path_criteria"].(string),
 		}
 	}
 	res.Trigger = trigger
@@ -82,7 +88,8 @@ func mapAidboxSubscriptionTopicToData(res *aidbox.AidboxSubscriptionTopic, data 
 	trigger := make([]interface{}, len(res.Trigger))
 	for i, v := range res.Trigger {
 		trigger[i] = map[string]interface{}{
-			"resource": v.Resource,
+			"resource":           v.Resource,
+			"fhir_path_criteria": v.FhirPathCriteria,
 		}
 	}
 	data.Set("trigger", trigger)

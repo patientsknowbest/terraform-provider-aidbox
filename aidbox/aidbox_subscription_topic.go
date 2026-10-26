@@ -12,7 +12,8 @@ type AidboxSubscriptionTopic struct {
 }
 
 type TopicTrigger struct {
-	Resource string `json:"resource"`
+	Resource         string `json:"resource"`
+	FhirPathCriteria string `json:"fhirPathCriteria,omitempty"`
 }
 
 func (*AidboxSubscriptionTopic) GetResourcePath() string {
